@@ -1,8 +1,13 @@
+/* =========================================================
+   KULIČKOVÉ TVARY PRO
+   SERVICE WORKER – VERZE 2.2
+========================================================= */
+
 const CACHE_NAME =
-    "kulickove-tvary-pro-2-1";
+    "kulickove-tvary-pro-2-2";
 
 
-const FILES_TO_CACHE = [
+const FILES = [
 
     "./",
 
@@ -19,26 +24,44 @@ const FILES_TO_CACHE = [
 ];
 
 
+/* =========================================================
+   INSTALACE
+========================================================= */
+
 self.addEventListener(
     "install",
     event => {
 
+        /*
+            Aktivuj novou verzi okamžitě.
+        */
+
+        self.skipWaiting();
+
+
         event.waitUntil(
 
-            caches.open(
-                CACHE_NAME
-            ).then(
-                cache =>
-                    cache.addAll(
-                        FILES_TO_CACHE
-                    )
-            )
+            caches
+                .open(
+                    CACHE_NAME
+                )
+
+                .then(
+                    cache =>
+                        cache.addAll(
+                            FILES
+                        )
+                )
 
         );
 
     }
 );
 
+
+/* =========================================================
+   AKTIVACE
+========================================================= */
 
 self.addEventListener(
     "activate",
@@ -46,27 +69,37 @@ self.addEventListener(
 
         event.waitUntil(
 
-            caches.keys().then(
-                keys =>
+            caches
+                .keys()
 
-                    Promise.all(
+                .then(
+                    keys =>
 
-                        keys
-                            .filter(
-                                key =>
-                                    key !==
-                                    CACHE_NAME
-                            )
-                            .map(
-                                key =>
-                                    caches.delete(
-                                        key
-                                    )
-                            )
+                        Promise.all(
 
-                    )
+                            keys
 
-            )
+                                .filter(
+                                    key =>
+                                        key !==
+                                        CACHE_NAME
+                                )
+
+                                .map(
+                                    key =>
+                                        caches.delete(
+                                            key
+                                        )
+                                )
+
+                        )
+
+                )
+
+                .then(
+                    () =>
+                        self.clients.claim()
+                )
 
         );
 
@@ -74,9 +107,17 @@ self.addEventListener(
 );
 
 
+/* =========================================================
+   NAČÍTÁNÍ
+========================================================= */
+
 self.addEventListener(
     "fetch",
     event => {
+
+        /*
+            Řešíme pouze GET.
+        */
 
         if (
             event.request.method !==
@@ -84,35 +125,34 @@ self.addEventListener(
         ) {
 
             return;
+
         }
 
 
         event.respondWith(
 
-            caches.match(
+            fetch(
                 event.request
-            ).then(
-                cached => {
+            )
 
-                    if (cached) {
+                .then(
+                    response => {
 
-                        return cached;
+                        /*
+                            Uložíme novou verzi
+                            do cache.
+                        */
 
-                    }
-
-
-                    return fetch(
-                        event.request
-                    ).then(
-                        response => {
-
-                            const copy =
-                                response.clone();
+                        const copy =
+                            response.clone();
 
 
-                            caches.open(
+                        caches
+                            .open(
                                 CACHE_NAME
-                            ).then(
+                            )
+
+                            .then(
                                 cache =>
                                     cache.put(
                                         event.request,
@@ -121,13 +161,17 @@ self.addEventListener(
                             );
 
 
-                            return response;
+                        return response;
 
-                        }
-                    );
+                    }
+                )
 
-                }
-            )
+                .catch(
+                    () =>
+                        caches.match(
+                            event.request
+                        )
+                )
 
         );
 
