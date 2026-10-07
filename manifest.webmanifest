@@ -1,16 +1,19 @@
-{
-  "name": "Kuličkové Tvary PRO",
-  "short_name": "Kuličkové Tvary",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#080d16",
-  "theme_color": "#080d16",
-  "lang": "cs",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
-    }
-  ]
+{{
+    "name": "Kuličkové Tvary PRO",
+    "short_name": "Kuličkové Tvary",
+    "description": "Logická hra s barevnými kuličkovými dílky.",
+    "lang": "cs",
+    "start_url": "./",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#080d16",
+    "theme_color": "#080d16",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
 }
