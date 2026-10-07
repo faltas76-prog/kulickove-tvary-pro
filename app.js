@@ -1,83 +1,19 @@
+/* =========================================================
+   KULIČKOVÉ TVARY PRO – MOBILE SAFE
+   Opravený start + bezpečný generátor řešení
+   ========================================================= */
+
 "use strict";
 
-/*
-========================================================
-KULIČKOVÉ TVARY PRO
-SYSTÉM NÁHODNĚ PŘEDLOŽENÝCH DÍLKŮ
-========================================================
-
-PRINCIP:
-
-1. Vygenerujeme kompletní řešení.
-2. Z kompletního řešení vybereme několik dílků.
-3. Ty automaticky položíme na hrací plochu.
-4. Ostatní dílky zůstanou hráči k dispozici.
-5. Hráč postupně doplňuje zbývající dílky.
-6. Počet předem vložených dílků určuje obtížnost.
-
-========================================================
-*/
+const W = 12;
+const H = 10;
 
 
-/* ======================================================
-   NASTAVENÍ
-====================================================== */
-
-const BOARD_WIDTH = 12;
-const BOARD_HEIGHT = 10;
-
-
-/*
-    Kolik dílků se předem umístí
-    podle obtížnosti.
-*/
-
-const DIFFICULTY_RULES = {
-
-    veryEasy: {
-        min: 8,
-        max: 9,
-        name: "VELMI LEHKÁ",
-        color: "green"
-    },
-
-    easy: {
-        min: 6,
-        max: 7,
-        name: "LEHKÁ",
-        color: "green"
-    },
-
-    medium: {
-        min: 4,
-        max: 5,
-        name: "STŘEDNÍ",
-        color: "yellow"
-    },
-
-    hard: {
-        min: 2,
-        max: 3,
-        name: "TĚŽKÁ",
-        color: "red"
-    },
-
-    expert: {
-        min: 1,
-        max: 1,
-        name: "EXPERT",
-        color: "red"
-    }
-
-};
-
-
-/* ======================================================
+/* =========================================================
    BARVY
-====================================================== */
+========================================================= */
 
 const COLORS = [
-
     "#ff4d5a",
     "#ff8a00",
     "#ffd21f",
@@ -90,108 +26,154 @@ const COLORS = [
     "#ff6a7c",
     "#80c84b",
     "#20b36b"
-
 ];
 
 
-/* ======================================================
-   ZÁKLADNÍ TVARY
-====================================================== */
+/* =========================================================
+   ZÁKLADNÍ TVARY DÍLKŮ
+========================================================= */
 
 const BASE_SHAPES = [
 
-    [[0, 0], [1, 0], [2, 0], [3, 0]],
+    [[0,0],[1,0],[2,0],[3,0]],
 
-    [[0, 0], [0, 1], [1, 1], [2, 1]],
+    [[0,0],[0,1],[1,1],[2,1]],
 
-    [[0, 0], [1, 0], [0, 1], [1, 1]],
+    [[0,0],[1,0],[0,1],[1,1]],
 
-    [[0, 0], [1, 0], [2, 0], [1, 1]],
+    [[0,0],[1,0],[2,0],[1,1]],
 
-    [[0, 0], [0, 1], [0, 2], [1, 2]],
+    [[0,0],[0,1],[0,2],[1,2]],
 
-    [[0, 0], [1, 0], [1, 1], [2, 1]],
+    [[0,0],[1,0],[1,1],[2,1]],
 
-    [[0, 0], [1, 0], [2, 0], [2, 1]],
+    [[0,0],[1,0],[2,0],[2,1]],
 
-    [[0, 0], [1, 0], [1, 1], [2, 1], [1, 2]],
+    [[0,0],[1,0],[1,1],[2,1],[1,2]],
 
-    [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2]],
+    [[0,0],[0,1],[1,1],[2,1],[2,2]],
 
-    [[0, 0], [1, 0], [1, 1], [1, 2], [2, 2]],
+    [[0,0],[1,0],[1,1],[1,2],[2,2]],
 
-    [[0, 0], [0, 1], [1, 1], [1, 2]],
+    [[0,0],[0,1],[1,1],[1,2]],
 
-    [[0, 0], [1, 0], [2, 0], [1, 1], [1, 2]]
+    [[0,0],[1,0],[2,0],[1,1],[1,2]]
 
 ];
 
 
-/* ======================================================
-   STAV
-====================================================== */
+/* =========================================================
+   OBTÍŽNOST
+========================================================= */
+
+const DIFFICULTY = {
+
+    veryEasy: {
+        min: 8,
+        max: 9,
+        label: "VELMI LEHKÁ"
+    },
+
+    easy: {
+        min: 6,
+        max: 7,
+        label: "LEHKÁ"
+    },
+
+    medium: {
+        min: 4,
+        max: 5,
+        label: "STŘEDNÍ"
+    },
+
+    hard: {
+        min: 2,
+        max: 3,
+        label: "TĚŽKÁ"
+    },
+
+    expert: {
+        min: 1,
+        max: 1,
+        label: "EXPERT"
+    }
+
+};
+
+
+/* =========================================================
+   STAV HRY
+========================================================= */
 
 let pieces = [];
 
-let selectedPieceId = null;
-
 let solution = [];
 
-let targetCells = new Set();
+let target = new Set();
 
-let preplacedCount = 0;
+let selectedId = null;
 
-let currentDifficulty = "medium";
+let dragging = null;
+
+let difficulty = "medium";
+
+let preplaced = 0;
 
 let moves = 0;
 
 let seconds = 0;
 
-let timerInterval = null;
+let timer = null;
 
-let dragging = null;
-
-let soundEnabled = true;
+let sound = true;
 
 
-/* ======================================================
+/* =========================================================
    DOM
-====================================================== */
+========================================================= */
+
+const $ = id =>
+    document.getElementById(id);
+
 
 const board =
-    document.getElementById("board");
+    $("board");
 
 const tray =
-    document.getElementById("piecesTray");
+    $("piecesTray");
 
-const targetPreview =
-    document.getElementById("targetPreview");
+const preview =
+    $("targetPreview");
 
 const message =
-    document.getElementById("message");
+    $("message");
 
-const movesElement =
-    document.getElementById("moves");
+const movesEl =
+    $("moves");
 
-const timerElement =
-    document.getElementById("timer");
+const timerEl =
+    $("timer");
 
-const placedElement =
-    document.getElementById("placedCount");
+const placedEl =
+    $("placedCount");
 
-const bestElement =
-    document.getElementById("best");
-
-const difficultyBadge =
-    document.getElementById("difficultyBadge");
+const badge =
+    $("difficultyBadge");
 
 const challengeName =
-    document.getElementById("challengeName");
+    $("challengeName");
 
 
-/* ======================================================
+/* =========================================================
    POMOCNÉ FUNKCE
-====================================================== */
+========================================================= */
+
+function key(x, y) {
+
+    return `${x},${y}`;
+
+}
+
 
 function clone(value) {
 
@@ -202,20 +184,11 @@ function clone(value) {
 }
 
 
-function randomInt(min, max) {
-
-    return Math.floor(
-        Math.random() *
-        (max - min + 1)
-    ) + min;
-
-}
-
-
 function shuffle(array) {
 
     const result =
         [...array];
+
 
     for (
         let i = result.length - 1;
@@ -229,6 +202,7 @@ function shuffle(array) {
                 (i + 1)
             );
 
+
         [
             result[i],
             result[j]
@@ -240,23 +214,13 @@ function shuffle(array) {
 
     }
 
+
     return result;
 
 }
 
 
-function cellKey(x, y) {
-
-    return `${x},${y}`;
-
-}
-
-
-/* ======================================================
-   TVARY
-====================================================== */
-
-function normalizeShape(shape) {
+function normalize(shape) {
 
     const minX =
         Math.min(
@@ -264,6 +228,7 @@ function normalizeShape(shape) {
                 p => p[0]
             )
         );
+
 
     const minY =
         Math.min(
@@ -291,50 +256,46 @@ function normalizeShape(shape) {
 }
 
 
-function rotateShape(shape) {
+function rotate(shape) {
 
-    return normalizeShape(
-
+    return normalize(
         shape.map(
             ([x, y]) => [
                 -y,
                 x
             ]
         )
-
     );
 
 }
 
 
-function flipShape(shape) {
+function flip(shape) {
 
-    return normalizeShape(
-
+    return normalize(
         shape.map(
             ([x, y]) => [
                 -x,
                 y
             ]
         )
-
     );
 
 }
 
 
-function getDimensions(shape) {
+function dimensions(shape) {
 
     return {
 
-        width:
+        w:
             Math.max(
                 ...shape.map(
                     p => p[0]
                 )
             ) + 1,
 
-        height:
+        h:
             Math.max(
                 ...shape.map(
                     p => p[1]
@@ -346,30 +307,86 @@ function getDimensions(shape) {
 }
 
 
-/* ======================================================
+function setMessage(
+    text,
+    type = ""
+) {
+
+    if (!message) {
+        return;
+    }
+
+
+    message.textContent =
+        text;
+
+
+    message.className =
+        "message";
+
+
+    if (type) {
+
+        message.classList.add(
+            type
+        );
+
+    }
+
+}
+
+
+function formatTime(value) {
+
+    return (
+
+        String(
+            Math.floor(
+                value / 60
+            )
+        ).padStart(
+            2,
+            "0"
+        )
+
+        +
+
+        ":" +
+
+        String(
+            value % 60
+        ).padStart(
+            2,
+            "0"
+        )
+
+    );
+
+}
+
+
+/* =========================================================
    VARIANTY TVARŮ
-====================================================== */
+========================================================= */
 
-function getShapeVariants(shape) {
+function variants(shape) {
 
-    const variants = [];
+    const result = [];
 
     let current =
-        normalizeShape(
-            shape
-        );
+        normalize(shape);
 
 
     for (
-        let flip = 0;
-        flip < 2;
-        flip++
+        let flipIndex = 0;
+        flipIndex < 2;
+        flipIndex++
     ) {
 
         let working =
-            flip === 0
-                ? current
-                : flipShape(current);
+            flipIndex
+                ? flip(current)
+                : current;
 
 
         for (
@@ -378,21 +395,21 @@ function getShapeVariants(shape) {
             rotation++
         ) {
 
-            const key =
+            const serialized =
                 JSON.stringify(
                     working
                 );
 
 
             if (
-                !variants.some(
-                    v =>
-                        JSON.stringify(v) ===
-                        key
+                !result.some(
+                    item =>
+                        JSON.stringify(item) ===
+                        serialized
                 )
             ) {
 
-                variants.push(
+                result.push(
                     clone(
                         working
                     )
@@ -402,7 +419,7 @@ function getShapeVariants(shape) {
 
 
             working =
-                rotateShape(
+                rotate(
                     working
                 );
 
@@ -411,14 +428,14 @@ function getShapeVariants(shape) {
     }
 
 
-    return variants;
+    return result;
 
 }
 
 
-/* ======================================================
+/* =========================================================
    VYTVOŘENÍ DÍLKŮ
-====================================================== */
+========================================================= */
 
 function createPieces() {
 
@@ -432,7 +449,7 @@ function createPieces() {
                         index + 1,
 
                     shape:
-                        normalizeShape(
+                        normalize(
                             shape
                         ),
 
@@ -456,199 +473,275 @@ function createPieces() {
             }
         );
 
-
-    selectedPieceId =
-        null;
-
 }
 
 
-/* ======================================================
-   GENEROVÁNÍ KOMPLETNÍHO ŘEŠENÍ
-======================================================
+/* =========================================================
+   GENERÁTOR ŘEŠENÍ
+========================================================= */
 
-    Náhodně položíme všech 12 dílků
-    tak, aby se nepřekrývaly.
+/*
+    Bezpečný backtracking.
 
-====================================================== */
+    Původní rekurzivní generátor mohl
+    na mobilu běžet příliš dlouho.
+
+    Zde je počet výpočtů omezen.
+*/
 
 function generateSolution() {
 
-    const placements = [];
+    const order =
+        [...pieces]
+
+            .sort(
+                (a, b) =>
+                    b.shape.length -
+                    a.shape.length
+            )
+
+            .map(
+                p => p.id
+            );
+
+
+    const placements =
+        new Array(
+            pieces.length
+        );
+
 
     const occupied =
         new Set();
 
 
-    /*
-        Největší dílky nejdříve.
-    */
-
-    const order =
-        [...pieces]
-            .sort(
-                (a, b) =>
-                    b.shape.length -
-                    a.shape.length
-            );
+    let nodes = 0;
 
 
-    for (
-        const piece of order
+    const MAX_NODES =
+        120000;
+
+
+    function tryPlace(
+        index
     ) {
 
-        const variants =
-            shuffle(
-                getShapeVariants(
-                    piece.shape
-                )
-            );
+        nodes++;
 
 
-        let placed =
-            false;
+        if (
+            nodes >
+            MAX_NODES
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            index >=
+            order.length
+        ) {
+
+            return true;
+
+        }
+
+
+        const id =
+            order[index];
+
+
+        const piece =
+            pieces[id - 1];
+
+
+        let candidates = [];
 
 
         for (
             const shape
-            of variants
+            of shuffle(
+                variants(
+                    piece.shape
+                )
+            )
         ) {
 
-            if (placed) {
-                break;
-            }
-
-
             const {
-                width,
-                height
+                w,
+                h
             } =
-                getDimensions(
+                dimensions(
                     shape
                 );
 
 
-            const positions = [];
-
-
             for (
                 let y = 0;
-                y <=
-                BOARD_HEIGHT -
-                height;
+                y <= H - h;
                 y++
             ) {
 
                 for (
                     let x = 0;
-                    x <=
-                    BOARD_WIDTH -
-                    width;
+                    x <= W - w;
                     x++
                 ) {
 
-                    positions.push({
-                        x,
-                        y
-                    });
-
-                }
-
-            }
+                    let valid =
+                        true;
 
 
-            /*
-                Náhodné pořadí pozic.
-            */
+                    for (
+                        const [
+                            dx,
+                            dy
+                        ]
+                        of shape
+                    ) {
 
-            const shuffledPositions =
-                shuffle(
-                    positions
-                );
-
-
-            for (
-                const position
-                of shuffledPositions
-            ) {
-
-                const valid =
-                    shape.every(
-                        ([dx, dy]) =>
-                            !occupied.has(
-                                cellKey(
-                                    position.x + dx,
-                                    position.y + dy
+                        if (
+                            occupied.has(
+                                key(
+                                    x + dx,
+                                    y + dy
                                 )
                             )
-                    );
+                        ) {
 
+                            valid =
+                                false;
 
-                if (!valid) {
-                    continue;
-                }
+                            break;
 
-
-                /*
-                    Položení dílku.
-                */
-
-                const placement = {
-
-                    id:
-                        piece.id,
-
-                    shape:
-                        clone(shape),
-
-                    x:
-                        position.x,
-
-                    y:
-                        position.y
-
-                };
-
-
-                placements.push(
-                    placement
-                );
-
-
-                shape.forEach(
-                    ([dx, dy]) => {
-
-                        occupied.add(
-                            cellKey(
-                                position.x + dx,
-                                position.y + dy
-                            )
-                        );
+                        }
 
                     }
-                );
 
 
-                placed = true;
+                    if (valid) {
 
-                break;
+                        candidates.push({
+                            shape,
+                            x,
+                            y
+                        });
+
+                    }
+
+                }
 
             }
 
         }
+
+
+        candidates =
+            shuffle(
+                candidates
+            );
 
 
         /*
-            Pokud se náhodné řešení
-            nepodařilo vytvořit,
-            generování začneme znovu.
+            Omezíme počet kandidátů.
         */
 
-        if (!placed) {
+        if (
+            candidates.length >
+            140
+        ) {
 
-            return generateSolution();
+            candidates =
+                candidates.slice(
+                    0,
+                    140
+                );
 
         }
+
+
+        for (
+            const candidate
+            of candidates
+        ) {
+
+            const cells =
+                candidate.shape.map(
+                    ([dx, dy]) =>
+                        key(
+                            candidate.x + dx,
+                            candidate.y + dy
+                        )
+                );
+
+
+            cells.forEach(
+                cell =>
+                    occupied.add(
+                        cell
+                    )
+            );
+
+
+            placements[
+                id - 1
+            ] = {
+
+                id,
+
+                shape:
+                    clone(
+                        candidate.shape
+                    ),
+
+                x:
+                    candidate.x,
+
+                y:
+                    candidate.y
+
+            };
+
+
+            if (
+                tryPlace(
+                    index + 1
+                )
+            ) {
+
+                return true;
+
+            }
+
+
+            cells.forEach(
+                cell =>
+                    occupied.delete(
+                        cell
+                    )
+            );
+
+
+            placements[
+                id - 1
+            ] =
+                null;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    if (
+        !tryPlace(0)
+    ) {
+
+        return null;
 
     }
 
@@ -658,23 +751,77 @@ function generateSolution() {
 }
 
 
-/* ======================================================
-   VÝBĚR OBTÍŽNOSTI
-====================================================== */
+/* =========================================================
+   VYTVOŘENÍ PUZZLE
+========================================================= */
+
+function buildPuzzle() {
+
+    for (
+        let attempt = 0;
+        attempt < 12;
+        attempt++
+    ) {
+
+        const result =
+            generateSolution();
+
+
+        if (result) {
+
+            return result;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   CÍLOVÝ TVAR
+========================================================= */
+
+function createTarget() {
+
+    target.clear();
+
+
+    for (
+        const piece
+        of solution
+    ) {
+
+        for (
+            const [
+                dx,
+                dy
+            ]
+            of piece.shape
+        ) {
+
+            target.add(
+                key(
+                    piece.x + dx,
+                    piece.y + dy
+                )
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   OBTÍŽNOST
+========================================================= */
 
 function chooseDifficulty() {
-
-    const levels =
-        Object.keys(
-            DIFFICULTY_RULES
-        );
-
-
-    /*
-        Náhodné rozložení obtížností.
-
-        Nejčastěji střední.
-    */
 
     const random =
         Math.random();
@@ -721,85 +868,81 @@ function chooseDifficulty() {
 }
 
 
-/* ======================================================
-   PŘEDVYPLNĚNÍ DÍLKŮ
-====================================================== */
+/* =========================================================
+   PŘEDEM UMÍSTĚNÉ DÍLKY
+========================================================= */
 
 function preplacePieces() {
 
     const rule =
-        DIFFICULTY_RULES[
-            currentDifficulty
+        DIFFICULTY[
+            difficulty
         ];
 
 
-    preplacedCount =
-        randomInt(
-            rule.min,
-            rule.max
-        );
+    preplaced =
+        Math.floor(
+            Math.random() *
+            (
+                rule.max -
+                rule.min +
+                1
+            )
+        )
+        +
+        rule.min;
 
-
-    /*
-        Vybereme náhodné dílky.
-    */
 
     const ids =
         shuffle(
             pieces.map(
-                p => p.id
+                piece =>
+                    piece.id
             )
         );
 
 
-    const selectedIds =
-        ids.slice(
-            0,
-            preplacedCount
+    const fixedIds =
+        new Set(
+            ids.slice(
+                0,
+                preplaced
+            )
         );
 
 
     pieces.forEach(
         piece => {
 
-            const placement =
-                solution.find(
-                    item =>
-                        item.id ===
-                        piece.id
-                );
+            const solved =
+                solution[
+                    piece.id - 1
+                ];
 
-
-            if (!placement) {
-                return;
-            }
-
-
-            /*
-                Všimneme si,
-                zda má být dílek
-                předem vložen.
-            */
 
             if (
-                selectedIds.includes(
+                fixedIds.has(
                     piece.id
                 )
             ) {
 
                 piece.shape =
                     clone(
-                        placement.shape
+                        solved.shape
                     );
 
+
                 piece.x =
-                    placement.x;
+                    solved.x;
+
 
                 piece.y =
-                    placement.y;
+                    solved.y;
+
 
                 piece.placed =
                     true;
+
 
                 piece.fixed =
                     true;
@@ -812,96 +955,9 @@ function preplacePieces() {
 }
 
 
-/* ======================================================
-   VYTVOŘENÍ CÍLOVÉHO TVARU
-====================================================== */
-
-function createTarget() {
-
-    targetCells.clear();
-
-
-    solution.forEach(
-        placement => {
-
-            placement.shape.forEach(
-                ([dx, dy]) => {
-
-                    targetCells.add(
-                        cellKey(
-                            placement.x + dx,
-                            placement.y + dy
-                        )
-                    );
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* ======================================================
-   ZOBRAZENÍ PŘEDLOHY
-====================================================== */
-
-function renderTargetPreview() {
-
-    targetPreview.innerHTML =
-        "";
-
-
-    for (
-        let y = 0;
-        y < BOARD_HEIGHT;
-        y++
-    ) {
-
-        for (
-            let x = 0;
-            x < BOARD_WIDTH;
-            x++
-        ) {
-
-            const cell =
-                document.createElement(
-                    "div"
-                );
-
-
-            cell.className =
-                "target-cell";
-
-
-            if (
-                targetCells.has(
-                    cellKey(x, y)
-                )
-            ) {
-
-                cell.classList.add(
-                    "target"
-                );
-
-            }
-
-
-            targetPreview.appendChild(
-                cell
-            );
-
-        }
-
-    }
-
-}
-
-
-/* ======================================================
-   VYTVOŘENÍ HRACÍ PLOCHY
-====================================================== */
+/* =========================================================
+   HRACÍ PLOCHA
+========================================================= */
 
 function createBoard() {
 
@@ -911,13 +967,13 @@ function createBoard() {
 
     for (
         let y = 0;
-        y < BOARD_HEIGHT;
+        y < H;
         y++
     ) {
 
         for (
             let x = 0;
-            x < BOARD_WIDTH;
+            x < W;
             x++
         ) {
 
@@ -933,6 +989,7 @@ function createBoard() {
 
             cell.dataset.x =
                 x;
+
 
             cell.dataset.y =
                 y;
@@ -962,116 +1019,69 @@ function createBoard() {
 }
 
 
-/* ======================================================
-   VYBRAT DÍLEK
-====================================================== */
-
-function selectPiece(id) {
-
-    const piece =
-        pieces.find(
-            p =>
-                p.id === id
-        );
-
-
-    if (!piece) {
-        return;
-    }
-
-
-    /*
-        Předem umístěné dílky
-        nelze přesouvat.
-
-        Jsou součástí zadání.
-    */
-
-    if (piece.fixed) {
-
-        setMessage(
-            `Dílek ${id} je součástí zadání a nelze ho přesouvat.`
-        );
-
-        return;
-
-    }
-
-
-    selectedPieceId =
-        id;
-
-
-    setMessage(
-        `Vybrán dílek ${id}. Přesuň ho na plochu.`
-    );
-
-
-    render();
-
-}
-
-
-/* ======================================================
+/* =========================================================
    OBSAZENÉ BUŇKY
-====================================================== */
+========================================================= */
 
-function getOccupiedCells(
+function occupied(
     excludeId = null
 ) {
 
-    const occupied =
+    const result =
         new Set();
 
 
-    pieces
+    pieces.forEach(
+        piece => {
 
-        .filter(
-            piece =>
-                piece.placed &&
-                piece.id !== excludeId
-        )
+            if (
+                !piece.placed ||
+                piece.id ===
+                excludeId
+            ) {
 
-        .forEach(
-            piece => {
-
-                piece.shape.forEach(
-                    ([dx, dy]) => {
-
-                        occupied.add(
-                            cellKey(
-                                piece.x + dx,
-                                piece.y + dy
-                            )
-                        );
-
-                    }
-                );
+                return;
 
             }
-        );
 
 
-    return occupied;
+            piece.shape.forEach(
+                ([dx, dy]) => {
+
+                    result.add(
+                        key(
+                            piece.x + dx,
+                            piece.y + dy
+                        )
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    return result;
 
 }
 
 
-/* ======================================================
+/* =========================================================
    KONTROLA UMÍSTĚNÍ
-====================================================== */
+========================================================= */
 
-function canPlacePiece(
+function canPlace(
     piece,
     x,
     y
 ) {
 
     const {
-        width,
-        height
+        w,
+        h
     } =
-        getDimensions(
+        dimensions(
             piece.shape
         );
 
@@ -1079,10 +1089,8 @@ function canPlacePiece(
     if (
         x < 0 ||
         y < 0 ||
-        x + width >
-            BOARD_WIDTH ||
-        y + height >
-            BOARD_HEIGHT
+        x + w > W ||
+        y + h > H
     ) {
 
         return false;
@@ -1090,33 +1098,30 @@ function canPlacePiece(
     }
 
 
-    const occupied =
-        getOccupiedCells(
+    const used =
+        occupied(
             piece.id
         );
 
 
     return piece.shape.every(
-        ([dx, dy]) => {
-
-            return !occupied.has(
-                cellKey(
+        ([dx, dy]) =>
+            !used.has(
+                key(
                     x + dx,
                     y + dy
                 )
-            );
-
-        }
+            )
     );
 
 }
 
 
-/* ======================================================
-   POZICE PRSTU
-====================================================== */
+/* =========================================================
+   PŘEVOD PRSTU NA BUŇKU
+========================================================= */
 
-function pointerToCell(
+function pointerCell(
     event
 ) {
 
@@ -1124,39 +1129,256 @@ function pointerToCell(
         board.getBoundingClientRect();
 
 
-    const x =
-        Math.floor(
-            (
-                event.clientX -
-                rect.left
-            ) /
-            rect.width *
-            BOARD_WIDTH
-        );
-
-
-    const y =
-        Math.floor(
-            (
-                event.clientY -
-                rect.top
-            ) /
-            rect.height *
-            BOARD_HEIGHT
-        );
-
-
     return {
-        x,
-        y
+
+        x:
+            Math.floor(
+                (
+                    event.clientX -
+                    rect.left
+                )
+                /
+                rect.width
+                *
+                W
+            ),
+
+        y:
+            Math.floor(
+                (
+                    event.clientY -
+                    rect.top
+                )
+                /
+                rect.height
+                *
+                H
+            )
+
     };
 
 }
 
 
-/* ======================================================
+/* =========================================================
+   START TAŽENÍ
+========================================================= */
+
+function startDrag(
+    event,
+    piece
+) {
+
+    if (
+        piece.fixed
+    ) {
+
+        setMessage(
+            `Dílek ${piece.id} je již součástí zadání.`
+        );
+
+        return;
+
+    }
+
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+
+    selectedId =
+        piece.id;
+
+
+    try {
+
+        event.currentTarget.setPointerCapture(
+            event.pointerId
+        );
+
+    } catch (_) {}
+
+
+    dragging = {
+
+        id:
+            piece.id,
+
+        pointerId:
+            event.pointerId
+
+    };
+
+
+    document.addEventListener(
+        "pointermove",
+        dragMove,
+        {
+            passive: false
+        }
+    );
+
+
+    document.addEventListener(
+        "pointerup",
+        endDrag,
+        {
+            once: true
+        }
+    );
+
+
+    document.addEventListener(
+        "pointercancel",
+        endDrag,
+        {
+            once: true
+        }
+    );
+
+
+    setMessage(
+        `Přesouváš dílek ${piece.id}…`
+    );
+
+}
+
+
+/* =========================================================
+   POHYB DÍLKU
+========================================================= */
+
+function dragMove(
+    event
+) {
+
+    if (!dragging) {
+
+        return;
+
+    }
+
+
+    event.preventDefault();
+
+
+    const piece =
+        pieces.find(
+            p =>
+                p.id ===
+                dragging.id
+        );
+
+
+    if (!piece) {
+
+        return;
+
+    }
+
+
+    const position =
+        pointerCell(
+            event
+        );
+
+
+    const {
+        w,
+        h
+    } =
+        dimensions(
+            piece.shape
+        );
+
+
+    let x =
+        position.x -
+        Math.floor(
+            w / 2
+        );
+
+
+    let y =
+        position.y -
+        Math.floor(
+            h / 2
+        );
+
+
+    /*
+        POHYB PO CELÉ PLOŠE.
+    */
+
+    x =
+        Math.max(
+            0,
+            Math.min(
+                W - w,
+                x
+            )
+        );
+
+
+    y =
+        Math.max(
+            0,
+            Math.min(
+                H - h,
+                y
+            )
+        );
+
+
+    if (
+        canPlace(
+            piece,
+            x,
+            y
+        )
+    ) {
+
+        piece.x =
+            x;
+
+
+        piece.y =
+            y;
+
+
+        piece.placed =
+            true;
+
+
+        render();
+
+    }
+
+}
+
+
+/* =========================================================
+   KONEC TAŽENÍ
+========================================================= */
+
+function endDrag() {
+
+    document.removeEventListener(
+        "pointermove",
+        dragMove
+    );
+
+
+    dragging =
+        null;
+
+}
+
+
+/* =========================================================
    UMÍSTĚNÍ KLEPNUTÍM
-====================================================== */
+========================================================= */
 
 function placeSelectedAt(
     x,
@@ -1164,7 +1386,7 @@ function placeSelectedAt(
 ) {
 
     if (
-        !selectedPieceId
+        !selectedId
     ) {
 
         return;
@@ -1176,7 +1398,7 @@ function placeSelectedAt(
         pieces.find(
             p =>
                 p.id ===
-                selectedPieceId
+                selectedId
         );
 
 
@@ -1191,477 +1413,90 @@ function placeSelectedAt(
 
 
     const {
-        width,
-        height
+        w,
+        h
     } =
-        getDimensions(
+        dimensions(
             piece.shape
         );
 
 
-    let newX =
+    let nx =
         x -
         Math.floor(
-            width / 2
+            w / 2
         );
 
 
-    let newY =
+    let ny =
         y -
         Math.floor(
-            height / 2
+            h / 2
         );
 
 
-    newX =
+    nx =
         Math.max(
             0,
             Math.min(
-                BOARD_WIDTH -
-                width,
-                newX
+                W - w,
+                nx
             )
         );
 
 
-    newY =
+    ny =
         Math.max(
             0,
             Math.min(
-                BOARD_HEIGHT -
-                height,
-                newY
+                H - h,
+                ny
             )
         );
 
 
     if (
-        canPlacePiece(
+        !canPlace(
             piece,
-            newX,
-            newY
+            nx,
+            ny
         )
     ) {
-
-        piece.x =
-            newX;
-
-        piece.y =
-            newY;
-
-        piece.placed =
-            true;
-
-        moves++;
-
-        render();
-
-        setMessage(
-            `Dílek ${piece.id} umístěn.`
-        );
-
-    } else {
 
         setMessage(
             "Na tomto místě už je jiný dílek.",
             "bad"
         );
 
-    }
-
-}
-
-
-/* ======================================================
-   TAŽENÍ DÍLKU
-====================================================== */
-
-function startDragging(
-    event,
-    piece
-) {
-
-    if (
-        piece.fixed
-    ) {
-
-        setMessage(
-            `Dílek ${piece.id} je předem vložený.`
-        );
 
         return;
 
     }
 
 
-    event.preventDefault();
-
-    event.stopPropagation();
-
-
-    selectPiece(
-        piece.id
-    );
+    piece.x =
+        nx;
 
 
-    try {
-
-        event.currentTarget.setPointerCapture(
-            event.pointerId
-        );
-
-    } catch (error) {
-        console.warn(error);
-    }
+    piece.y =
+        ny;
 
 
-    dragging = {
-
-        pieceId:
-            piece.id,
-
-        pointerId:
-            event.pointerId
-
-    };
+    piece.placed =
+        true;
 
 
-    document.addEventListener(
-        "pointermove",
-        handleDragMove,
-        {
-            passive: false
-        }
-    );
+    moves++;
 
 
-    document.addEventListener(
-        "pointerup",
-        finishDragging,
-        {
-            once: true
-        }
-    );
-
-
-    document.addEventListener(
-        "pointercancel",
-        finishDragging,
-        {
-            once: true
-        }
-    );
+    render();
 
 }
 
 
-/* ======================================================
-   POHYB DÍLKU
-====================================================== */
-
-function handleDragMove(
-    event
-) {
-
-    if (!dragging) {
-        return;
-    }
-
-
-    event.preventDefault();
-
-
-    const piece =
-        pieces.find(
-            p =>
-                p.id ===
-                dragging.pieceId
-        );
-
-
-    if (!piece) {
-        return;
-    }
-
-
-    const {
-        x,
-        y
-    } =
-        pointerToCell(
-            event
-        );
-
-
-    const {
-        width,
-        height
-    } =
-        getDimensions(
-            piece.shape
-        );
-
-
-    let newX =
-        x -
-        Math.floor(
-            width / 2
-        );
-
-
-    let newY =
-        y -
-        Math.floor(
-            height / 2
-        );
-
-
-    /*
-        Plynulý pohyb po CELÉ ploše.
-    */
-
-    newX =
-        Math.max(
-            0,
-            Math.min(
-                BOARD_WIDTH -
-                width,
-                newX
-            )
-        );
-
-
-    newY =
-        Math.max(
-            0,
-            Math.min(
-                BOARD_HEIGHT -
-                height,
-                newY
-            )
-        );
-
-
-    /*
-        Kontrolujeme pouze kolizi.
-        Ne kontrolu správnosti.
-    */
-
-    if (
-        canPlacePiece(
-            piece,
-            newX,
-            newY
-        )
-    ) {
-
-        piece.x =
-            newX;
-
-        piece.y =
-            newY;
-
-        piece.placed =
-            true;
-
-        render();
-
-    }
-
-}
-
-
-/* ======================================================
-   KONEC TAŽENÍ
-====================================================== */
-
-function finishDragging() {
-
-    document.removeEventListener(
-        "pointermove",
-        handleDragMove
-    );
-
-
-    dragging =
-        null;
-
-}
-
-
-/* ======================================================
-   VYKRESLENÍ DÍLKŮ
-====================================================== */
-
-function renderBoardPieces() {
-
-    board
-        .querySelectorAll(
-            ".board-piece"
-        )
-        .forEach(
-            element =>
-                element.remove()
-        );
-
-
-    pieces
-        .filter(
-            piece =>
-                piece.placed
-        )
-        .forEach(
-            piece => {
-
-                const {
-                    width,
-                    height
-                } =
-                    getDimensions(
-                        piece.shape
-                    );
-
-
-                const element =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                element.className =
-                    "board-piece";
-
-
-                if (
-                    piece.id ===
-                    selectedPieceId
-                ) {
-
-                    element.classList.add(
-                        "selected"
-                    );
-
-                }
-
-
-                if (
-                    piece.fixed
-                ) {
-
-                    element.classList.add(
-                        "fixed-piece"
-                    );
-
-                }
-
-
-                element.style.gridColumn =
-                    `${piece.x + 1} / span ${width}`;
-
-
-                element.style.gridRow =
-                    `${piece.y + 1} / span ${height}`;
-
-
-                piece.shape.forEach(
-                    ([x, y]) => {
-
-                        const bead =
-                            document.createElement(
-                                "span"
-                            );
-
-
-                        bead.className =
-                            "bead";
-
-
-                        bead.style.setProperty(
-                            "--piece",
-                            piece.color
-                        );
-
-
-                        bead.style.left =
-                            `${x / width * 100}%`;
-
-
-                        bead.style.top =
-                            `${y / height * 100}%`;
-
-
-                        bead.style.width =
-                            `${100 / width}%`;
-
-
-                        bead.style.height =
-                            `${100 / height}%`;
-
-
-                        element.appendChild(
-                            bead
-                        );
-
-                    }
-                );
-
-
-                if (
-                    !piece.fixed
-                ) {
-
-                    element.addEventListener(
-                        "pointerdown",
-                        event => {
-
-                            startDragging(
-                                event,
-                                piece
-                            );
-
-                        }
-                    );
-
-                }
-
-
-                element.addEventListener(
-                    "click",
-                    () => {
-
-                        if (
-                            !piece.fixed
-                        ) {
-
-                            selectPiece(
-                                piece.id
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                board.appendChild(
-                    element
-                );
-
-            }
-        );
-
-
-    placedElement.textContent =
-        `${pieces.filter(
-            p => p.placed
-        ).length} / 12 dílků`;
-
-}
-
-
-/* ======================================================
-   ZÁSOBNÍK
-====================================================== */
+/* =========================================================
+   RENDER – ZÁSOBNÍK
+========================================================= */
 
 function renderTray() {
 
@@ -1671,12 +1506,6 @@ function renderTray() {
 
     pieces.forEach(
         piece => {
-
-            /*
-                Předem položené dílky
-                v zásobníku nebudeme
-                zobrazovat jako dostupné.
-            */
 
             const card =
                 document.createElement(
@@ -1690,7 +1519,7 @@ function renderTray() {
 
             if (
                 piece.id ===
-                selectedPieceId
+                selectedId
             ) {
 
                 card.classList.add(
@@ -1711,31 +1540,31 @@ function renderTray() {
             }
 
 
-            const miniShape =
+            const mini =
                 document.createElement(
                     "div"
                 );
 
 
-            miniShape.className =
+            mini.className =
                 "mini-shape";
 
 
             const {
-                width,
-                height
+                w,
+                h
             } =
-                getDimensions(
+                dimensions(
                     piece.shape
                 );
 
 
-            miniShape.style.width =
-                `${width * 21}px`;
+            mini.style.width =
+                `${w * 21}px`;
 
 
-            miniShape.style.height =
-                `${height * 21}px`;
+            mini.style.height =
+                `${h * 21}px`;
 
 
             piece.shape.forEach(
@@ -1771,7 +1600,7 @@ function renderTray() {
                         piece.color;
 
 
-                    miniShape.appendChild(
+                    mini.appendChild(
                         bead
                     );
 
@@ -1780,7 +1609,7 @@ function renderTray() {
 
 
             card.appendChild(
-                miniShape
+                mini
             );
 
 
@@ -1809,14 +1638,11 @@ function renderTray() {
 
                 card.addEventListener(
                     "pointerdown",
-                    event => {
-
-                        startDragging(
+                    event =>
+                        startDrag(
                             event,
                             piece
-                        );
-
-                    }
+                        )
                 );
 
 
@@ -1824,9 +1650,10 @@ function renderTray() {
                     "click",
                     () => {
 
-                        selectPiece(
-                            piece.id
-                        );
+                        selectedId =
+                            piece.id;
+
+                        render();
 
                     }
                 );
@@ -1844,418 +1671,278 @@ function renderTray() {
 }
 
 
-/* ======================================================
-   CELKOVÉ VYKRESLENÍ
-====================================================== */
+/* =========================================================
+   RENDER – HRACÍ PLOCHA
+========================================================= */
+
+function renderBoard() {
+
+    board
+        .querySelectorAll(
+            ".board-piece"
+        )
+        .forEach(
+            element =>
+                element.remove()
+        );
+
+
+    pieces
+        .filter(
+            piece =>
+                piece.placed
+        )
+        .forEach(
+            piece => {
+
+                const {
+                    w,
+                    h
+                } =
+                    dimensions(
+                        piece.shape
+                    );
+
+
+                const element =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                element.className =
+                    "board-piece";
+
+
+                if (
+                    piece.id ===
+                    selectedId
+                ) {
+
+                    element.classList.add(
+                        "selected"
+                    );
+
+                }
+
+
+                if (
+                    piece.fixed
+                ) {
+
+                    element.classList.add(
+                        "fixed-piece"
+                    );
+
+                }
+
+
+                element.style.gridColumn =
+                    `${piece.x + 1} / span ${w}`;
+
+
+                element.style.gridRow =
+                    `${piece.y + 1} / span ${h}`;
+
+
+                piece.shape.forEach(
+                    ([x, y]) => {
+
+                        const bead =
+                            document.createElement(
+                                "span"
+                            );
+
+
+                        bead.className =
+                            "bead";
+
+
+                        bead.style.setProperty(
+                            "--piece",
+                            piece.color
+                        );
+
+
+                        bead.style.left =
+                            `${x / w * 100}%`;
+
+
+                        bead.style.top =
+                            `${y / h * 100}%`;
+
+
+                        bead.style.width =
+                            `${100 / w}%`;
+
+
+                        bead.style.height =
+                            `${100 / h}%`;
+
+
+                        element.appendChild(
+                            bead
+                        );
+
+                    }
+                );
+
+
+                if (
+                    !piece.fixed
+                ) {
+
+                    element.addEventListener(
+                        "pointerdown",
+                        event =>
+                            startDrag(
+                                event,
+                                piece
+                            )
+                    );
+
+
+                    element.addEventListener(
+                        "click",
+                        () => {
+
+                            selectedId =
+                                piece.id;
+
+                            render();
+
+                        }
+                    );
+
+                }
+
+
+                board.appendChild(
+                    element
+                );
+
+            }
+        );
+
+
+    placedEl.textContent =
+        `${pieces.filter(
+            p => p.placed
+        ).length} / 12 dílků`;
+
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
 
 function render() {
 
-    renderBoardPieces();
-
     renderTray();
+
+    renderBoard();
 
     updateStats();
 
 }
 
 
-/* ======================================================
+/* =========================================================
+   PŘEDLOHA
+========================================================= */
+
+function renderTarget() {
+
+    preview.innerHTML =
+        "";
+
+
+    for (
+        let y = 0;
+        y < H;
+        y++
+    ) {
+
+        for (
+            let x = 0;
+            x < W;
+            x++
+        ) {
+
+            const cell =
+                document.createElement(
+                    "div"
+                );
+
+
+            cell.className =
+                "target-cell";
+
+
+            if (
+                target.has(
+                    key(
+                        x,
+                        y
+                    )
+                )
+            ) {
+
+                cell.classList.add(
+                    "target"
+                );
+
+            }
+
+
+            preview.appendChild(
+                cell
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
    STATISTIKY
-====================================================== */
+========================================================= */
 
 function updateStats() {
 
-    movesElement.textContent =
-        moves;
+    if (movesEl) {
 
+        movesEl.textContent =
+            moves;
 
-    const minutes =
-        String(
-            Math.floor(
-                seconds / 60
-            )
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const secs =
-        String(
-            seconds % 60
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    timerElement.textContent =
-        `${minutes}:${secs}`;
-
-}
-
-
-/* ======================================================
-   NASTAVENÍ OBTÍŽNOSTI
-====================================================== */
-
-function updateDifficultyDisplay() {
-
-    const rule =
-        DIFFICULTY_RULES[
-            currentDifficulty
-        ];
-
-
-    difficultyBadge.textContent =
-        rule.name;
-
-
-    challengeName.textContent =
-        `Předem vloženo ${preplacedCount} z 12 dílků`;
-
-}
-
-
-/* ======================================================
-   NOVÁ HRA
-====================================================== */
-
-function startNewPuzzle() {
-
-    stopTimer();
-
-
-    createPieces();
-
-
-    /*
-        Vygenerujeme kompletní řešení.
-    */
-
-    solution =
-        generateSolution();
-
-
-    /*
-        Z řešení vytvoříme cílový tvar.
-    */
-
-    createTarget();
-
-
-    /*
-        Náhodně zvolíme obtížnost.
-    */
-
-    currentDifficulty =
-        chooseDifficulty();
-
-
-    /*
-        Náhodně předvyplníme dílky.
-    */
-
-    preplacePieces();
-
-
-    updateDifficultyDisplay();
-
-
-    renderTargetPreview();
-
-
-    createBoard();
-
-
-    render();
-
-
-    moves = 0;
-
-    seconds = 0;
-
-
-    updateStats();
-
-
-    setMessage(
-
-        `Úkol je připraven. ` +
-        `Na ploše je již ${preplacedCount} dílků. ` +
-        `Doplň zbývající dílky.`
-
-    );
-
-
-    startTimer();
-
-}
-
-
-/* ======================================================
-   KONTROLA ŘEŠENÍ
-====================================================== */
-
-function checkSolution() {
-
-    /*
-        Všechny dílky musí být položeny.
-    */
-
-    const allPlaced =
-        pieces.every(
-            piece =>
-                piece.placed
-        );
-
-
-    if (!allPlaced) {
-
-        const remaining =
-            pieces.filter(
-                piece =>
-                    !piece.placed
-            ).length;
-
-
-        setMessage(
-
-            `Ještě chybí ${remaining} ` +
-            `dílk${remaining === 1 ? "a" : "y"}.`,
-
-            "bad"
-
-        );
-
-
-        return;
     }
 
 
-    /*
-        Vytvoříme skutečně obsazené buňky.
-    */
+    if (timerEl) {
 
-    const occupied =
-        getOccupiedCells();
-
-
-    /*
-        Počet musí odpovídat
-        cílovému tvaru.
-    */
-
-    if (
-        occupied.size !==
-        targetCells.size
-    ) {
-
-        setMessage(
-            "Počet obsazených polí nesouhlasí s předlohou.",
-            "bad"
-        );
-
-        return;
-    }
-
-
-    /*
-        Kontrola každého pole.
-    */
-
-    const correct =
-        [...targetCells].every(
-            cell =>
-                occupied.has(
-                    cell
-                )
-        );
-
-
-    if (!correct) {
-
-        setMessage(
-            "Některé dílky nejsou na správném místě.",
-            "bad"
-        );
-
-        return;
-    }
-
-
-    /*
-        ÚSPĚCH
-    */
-
-    stopTimer();
-
-
-    setMessage(
-        "Výborně! Předloha je správně složená.",
-        "good"
-    );
-
-
-    saveBestResult();
-
-
-    showSuccess();
-
-}
-
-
-/* ======================================================
-   REKORD
-====================================================== */
-
-function saveBestResult() {
-
-    const key =
-        `kt-${currentDifficulty}`;
-
-
-    let records = {};
-
-
-    try {
-
-        records =
-            JSON.parse(
-                localStorage.getItem(
-                    "ktpro-records"
-                ) || "{}"
+        timerEl.textContent =
+            formatTime(
+                seconds
             );
 
-    } catch (error) {
-
-        records = {};
-
-    }
-
-
-    const previous =
-        records[key];
-
-
-    if (
-        !previous ||
-        seconds <
-            previous.seconds
-    ) {
-
-        records[key] = {
-
-            seconds,
-
-            moves,
-
-            preplaced:
-                preplacedCount,
-
-            date:
-                new Date()
-                    .toLocaleDateString(
-                        "cs-CZ"
-                    )
-
-        };
-
-
-        localStorage.setItem(
-            "ktpro-records",
-            JSON.stringify(
-                records
-            )
-        );
-
     }
 
 }
 
 
-/* ======================================================
-   ÚSPĚCH
-====================================================== */
-
-function showSuccess() {
-
-    const modal =
-        document.getElementById(
-            "successModal"
-        );
-
-
-    const text =
-        document.getElementById(
-            "successText"
-        );
-
-
-    if (text) {
-
-        text.textContent =
-            `Hotovo za ${formatTime(seconds)} ` +
-            `a ${moves} tahů.`;
-
-    }
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    playSuccessSound();
-
-}
-
-
-/* ======================================================
-   FORMÁT ČASU
-====================================================== */
-
-function formatTime(secondsValue) {
-
-    const minutes =
-        String(
-            Math.floor(
-                secondsValue / 60
-            )
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const secondsPart =
-        String(
-            secondsValue % 60
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    return `${minutes}:${secondsPart}`;
-
-}
-
-
-/* ======================================================
-   ČASOMÍRA
-====================================================== */
+/* =========================================================
+   ČAS
+========================================================= */
 
 function startTimer() {
 
     stopTimer();
 
 
-    timerInterval =
+    timer =
         setInterval(
             () => {
 
@@ -2272,380 +1959,402 @@ function startTimer() {
 
 function stopTimer() {
 
-    if (
-        timerInterval
-    ) {
+    if (timer) {
 
         clearInterval(
-            timerInterval
+            timer
         );
 
-        timerInterval =
-            null;
-
     }
+
+
+    timer =
+        null;
 
 }
 
 
-/* ======================================================
-   ZVUK
-====================================================== */
+/* =========================================================
+   KONTROLA ŘEŠENÍ
+========================================================= */
 
-function playSuccessSound() {
+function checkSolution() {
 
-    if (!soundEnabled) {
+    const allPlaced =
+        pieces.every(
+            piece =>
+                piece.placed
+        );
+
+
+    if (!allPlaced) {
+
+        const missing =
+            pieces.filter(
+                piece =>
+                    !piece.placed
+            ).length;
+
+
+        setMessage(
+            `Ještě chybí ${missing} dílků.`,
+            "bad"
+        );
+
+
         return;
+
     }
 
 
-    try {
-
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
+    const used =
+        occupied();
 
 
-        if (!AudioContext) {
-            return;
+    const correct =
+        used.size ===
+            target.size &&
+
+        [...target].every(
+            cell =>
+                used.has(
+                    cell
+                )
+        );
+
+
+    if (!correct) {
+
+        setMessage(
+            "Některé dílky nejsou na správném místě.",
+            "bad"
+        );
+
+
+        return;
+
+    }
+
+
+    stopTimer();
+
+
+    setMessage(
+        "Výborně! Úkol je správně složený.",
+        "good"
+    );
+
+
+    const modal =
+        $("successModal");
+
+
+    if (modal) {
+
+        const text =
+            $("successText");
+
+
+        if (text) {
+
+            text.textContent =
+                `Hotovo za ${formatTime(
+                    seconds
+                )} a ${moves} tahů.`;
+
         }
 
 
-        const audio =
-            new AudioContext();
+        modal.classList.remove(
+            "hidden"
+        );
+
+    }
 
 
-        const oscillator =
-            audio.createOscillator();
+    playSuccess();
+
+}
 
 
-        const gain =
-            audio.createGain();
+/* =========================================================
+   NOVÁ HRA
+========================================================= */
+
+function startNewPuzzle() {
+
+    stopTimer();
 
 
-        oscillator.type =
-            "sine";
+    createPieces();
 
 
-        oscillator.frequency.value =
-            880;
+    let generated =
+        null;
 
 
-        gain.gain.value =
-            0.04;
+    /*
+        Maximálně 5 pokusů.
+    */
+
+    for (
+        let i = 0;
+        i < 5 &&
+        !generated;
+        i++
+    ) {
+
+        generated =
+            buildPuzzle();
+
+    }
 
 
-        oscillator.connect(
-            gain
+    if (!generated) {
+
+        setMessage(
+            "Nepodařilo se vytvořit úkol. Klepni na Nová hra znovu.",
+            "bad"
         );
 
 
-        gain.connect(
-            audio.destination
+        return;
+
+    }
+
+
+    solution =
+        generated;
+
+
+    createTarget();
+
+
+    difficulty =
+        chooseDifficulty();
+
+
+    preplacePieces();
+
+
+    if (badge) {
+
+        badge.textContent =
+            DIFFICULTY[
+                difficulty
+            ].label;
+
+    }
+
+
+    if (challengeName) {
+
+        challengeName.textContent =
+            `Předem vloženo ${preplaced} z 12 dílků`;
+
+    }
+
+
+    renderTarget();
+
+
+    createBoard();
+
+
+    moves =
+        0;
+
+
+    seconds =
+        0;
+
+
+    selectedId =
+        null;
+
+
+    render();
+
+
+    setMessage(
+        `Úkol připraven. ${preplaced} dílků je již na ploše.`
+    );
+
+
+    startTimer();
+
+}
+
+
+/* =========================================================
+   OTOČENÍ / PŘEKLOPENÍ
+========================================================= */
+
+function transformSelected(
+    type
+) {
+
+    const piece =
+        pieces.find(
+            p =>
+                p.id ===
+                selectedId
         );
 
 
-        oscillator.start();
+    if (
+        !piece ||
+        piece.fixed
+    ) {
+
+        return;
+
+    }
 
 
-        oscillator.stop(
-            audio.currentTime +
-            0.25
+    const old =
+        clone(
+            piece.shape
         );
 
-    } catch (error) {
 
-        console.warn(
-            "Zvuk není dostupný."
+    if (
+        type === "right"
+    ) {
+
+        piece.shape =
+            rotate(
+                piece.shape
+            );
+
+    }
+
+
+    if (
+        type === "left"
+    ) {
+
+        piece.shape =
+            rotate(
+                rotate(
+                    rotate(
+                        piece.shape
+                    )
+                )
+            );
+
+    }
+
+
+    if (
+        type === "flip"
+    ) {
+
+        piece.shape =
+            flip(
+                piece.shape
+            );
+
+    }
+
+
+    if (
+        piece.placed &&
+        !canPlace(
+            piece,
+            piece.x,
+            piece.y
+        )
+    ) {
+
+        piece.shape =
+            old;
+
+
+        setMessage(
+            "Tento tvar se na současné místo nevejde.",
+            "bad"
         );
+
+
+        return;
+
+    }
+
+
+    moves++;
+
+
+    render();
+
+}
+
+
+/* =========================================================
+   POSUN KLÁVESNICÍ
+========================================================= */
+
+function moveSelected(
+    dx,
+    dy
+) {
+
+    const piece =
+        pieces.find(
+            p =>
+                p.id ===
+                selectedId
+        );
+
+
+    if (
+        !piece ||
+        piece.fixed ||
+        !piece.placed
+    ) {
+
+        return;
+
+    }
+
+
+    const x =
+        piece.x + dx;
+
+
+    const y =
+        piece.y + dy;
+
+
+    if (
+        canPlace(
+            piece,
+            x,
+            y
+        )
+    ) {
+
+        piece.x =
+            x;
+
+
+        piece.y =
+            y;
+
+
+        moves++;
+
+
+        render();
 
     }
 
 }
 
 
-/* ======================================================
-   TLAČÍTKA
-====================================================== */
-
-document
-    .getElementById(
-        "newGame"
-    )
-    .addEventListener(
-        "click",
-        startNewPuzzle
-    );
-
-
-document
-    .getElementById(
-        "checkButton"
-    )
-    .addEventListener(
-        "click",
-        checkSolution
-    );
-
-
-document
-    .getElementById(
-        "clearBoard"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            pieces.forEach(
-                piece => {
-
-                    if (
-                        piece.fixed
-                    ) {
-                        return;
-                    }
-
-
-                    piece.placed =
-                        false;
-
-                    piece.x =
-                        null;
-
-                    piece.y =
-                        null;
-
-                }
-            );
-
-
-            moves++;
-
-            render();
-
-
-            setMessage(
-                "Pohyblivé dílky byly vráceny."
-            );
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "resetButton"
-    )
-    .addEventListener(
-        "click",
-        startNewPuzzle
-    );
-
-
-/* ======================================================
-   OTÁČENÍ
-====================================================== */
-
-document
-    .getElementById(
-        "rotateRight"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            const piece =
-                pieces.find(
-                    p =>
-                        p.id ===
-                        selectedPieceId
-                );
-
-
-            if (
-                !piece ||
-                piece.fixed
-            ) {
-                return;
-            }
-
-
-            piece.shape =
-                rotateShape(
-                    piece.shape
-                );
-
-
-            moves++;
-
-            render();
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "rotateLeft"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            const piece =
-                pieces.find(
-                    p =>
-                        p.id ===
-                        selectedPieceId
-                );
-
-
-            if (
-                !piece ||
-                piece.fixed
-            ) {
-                return;
-            }
-
-
-            piece.shape =
-                rotateShape(
-                    rotateShape(
-                        rotateShape(
-                            piece.shape
-                        )
-                    )
-                );
-
-
-            moves++;
-
-            render();
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "flipPiece"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            const piece =
-                pieces.find(
-                    p =>
-                        p.id ===
-                        selectedPieceId
-                );
-
-
-            if (
-                !piece ||
-                piece.fixed
-            ) {
-                return;
-            }
-
-
-            piece.shape =
-                flipShape(
-                    piece.shape
-                );
-
-
-            moves++;
-
-            render();
-
-        }
-    );
-
-
-/* ======================================================
-   VRÁCENÍ DÍLKU
-====================================================== */
-
-document
-    .getElementById(
-        "removePiece"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            const piece =
-                pieces.find(
-                    p =>
-                        p.id ===
-                        selectedPieceId
-                );
-
-
-            if (
-                !piece ||
-                piece.fixed
-            ) {
-                return;
-            }
-
-
-            piece.placed =
-                false;
-
-
-            piece.x =
-                null;
-
-
-            piece.y =
-                null;
-
-
-            moves++;
-
-
-            render();
-
-
-            setMessage(
-                `Dílek ${piece.id} byl vrácen.`
-            );
-
-        }
-    );
-
-
-/* ======================================================
-   ZVUK
-====================================================== */
-
-document
-    .getElementById(
-        "soundButton"
-    )
-    .addEventListener(
-        "click",
-        event => {
-
-            soundEnabled =
-                !soundEnabled;
-
-
-            event.currentTarget.textContent =
-                soundEnabled
-                    ? "🔊 Zvuk"
-                    : "🔇 Zvuk";
-
-        }
-    );
-
-
-/* ======================================================
+/* =========================================================
    KLÁVESNICE
-====================================================== */
+========================================================= */
 
 document.addEventListener(
     "keydown",
@@ -2657,29 +2366,17 @@ document.addEventListener(
 
 
         if (
-            tag === "INPUT" ||
-            tag === "SELECT" ||
-            tag === "TEXTAREA"
+            [
+                "INPUT",
+                "SELECT",
+                "TEXTAREA"
+            ].includes(
+                tag
+            )
         ) {
 
             return;
 
-        }
-
-
-        const piece =
-            pieces.find(
-                p =>
-                    p.id ===
-                    selectedPieceId
-            );
-
-
-        if (
-            !piece ||
-            piece.fixed
-        ) {
-            return;
         }
 
 
@@ -2742,75 +2439,345 @@ document.addEventListener(
 
         }
 
+
+        if (
+            event.key.toLowerCase() ===
+            "r"
+        ) {
+
+            transformSelected(
+                "right"
+            );
+
+        }
+
+
+        if (
+            event.key.toLowerCase() ===
+            "e"
+        ) {
+
+            transformSelected(
+                "left"
+            );
+
+        }
+
+
+        if (
+            event.key.toLowerCase() ===
+            "f"
+        ) {
+
+            transformSelected(
+                "flip"
+            );
+
+        }
+
     }
 );
 
 
-/* ======================================================
-   POHYB KLÁVESNICÍ
-====================================================== */
+/* =========================================================
+   TLAČÍTKA
+========================================================= */
 
-function moveSelected(
-    dx,
-    dy
-) {
-
-    const piece =
-        pieces.find(
-            p =>
-                p.id ===
-                selectedPieceId
-        );
+$("newGame")
+    ?.addEventListener(
+        "click",
+        startNewPuzzle
+    );
 
 
-    if (
-        !piece ||
-        piece.fixed ||
-        !piece.placed
-    ) {
+$("checkButton")
+    ?.addEventListener(
+        "click",
+        checkSolution
+    );
+
+
+$("resetButton")
+    ?.addEventListener(
+        "click",
+        startNewPuzzle
+    );
+
+
+$("rotateLeft")
+    ?.addEventListener(
+        "click",
+        () =>
+            transformSelected(
+                "left"
+            )
+    );
+
+
+$("rotateRight")
+    ?.addEventListener(
+        "click",
+        () =>
+            transformSelected(
+                "right"
+            )
+    );
+
+
+$("flipPiece")
+    ?.addEventListener(
+        "click",
+        () =>
+            transformSelected(
+                "flip"
+            )
+    );
+
+
+$("clearBoard")
+    ?.addEventListener(
+        "click",
+        () => {
+
+            pieces.forEach(
+                piece => {
+
+                    if (
+                        piece.fixed
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    piece.placed =
+                        false;
+
+
+                    piece.x =
+                        null;
+
+
+                    piece.y =
+                        null;
+
+                }
+            );
+
+
+            moves++;
+
+
+            render();
+
+        }
+    );
+
+
+$("closeSuccess")
+    ?.addEventListener(
+        "click",
+        () => {
+
+            $("successModal")
+                ?.classList
+                .add(
+                    "hidden"
+                );
+
+        }
+    );
+
+
+$("nextChallenge")
+    ?.addEventListener(
+        "click",
+        () => {
+
+            $("successModal")
+                ?.classList
+                .add(
+                    "hidden"
+                );
+
+
+            startNewPuzzle();
+
+        }
+    );
+
+
+$("soundButton")
+    ?.addEventListener(
+        "click",
+        event => {
+
+            sound =
+                !sound;
+
+
+            event.currentTarget.textContent =
+                sound
+                    ? "🔊 Zvuk"
+                    : "🔇 Zvuk";
+
+        }
+    );
+
+
+/* =========================================================
+   ZVUK
+========================================================= */
+
+function playSuccess() {
+
+    if (!sound) {
 
         return;
 
     }
 
 
-    const newX =
-        piece.x + dx;
+    try {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
 
 
-    const newY =
-        piece.y + dy;
+        if (!AudioContext) {
+
+            return;
+
+        }
 
 
-    if (
-        canPlacePiece(
-            piece,
-            newX,
-            newY
-        )
-    ) {
+        const context =
+            new AudioContext();
 
-        piece.x =
-            newX;
 
-        piece.y =
-            newY;
+        const oscillator =
+            context.createOscillator();
 
-        moves++;
 
-        render();
+        const gain =
+            context.createGain();
+
+
+        oscillator.type =
+            "sine";
+
+
+        oscillator.frequency.value =
+            880;
+
+
+        gain.gain.value =
+            0.04;
+
+
+        oscillator.connect(
+            gain
+        );
+
+
+        gain.connect(
+            context.destination
+        );
+
+
+        oscillator.start();
+
+
+        oscillator.stop(
+            context.currentTime +
+            0.2
+        );
+
+    } catch (_) {}
+
+}
+
+
+/* =========================================================
+   SPUŠTĚNÍ APLIKACE
+========================================================= */
+
+/*
+    TOTO JE DŮLEŽITÁ OPRAVA.
+
+    Aplikace se nespustí dříve,
+    než je kompletně načtený HTML dokument.
+*/
+
+function boot() {
+
+    try {
+
+        if (
+            !board ||
+            !tray ||
+            !preview
+        ) {
+
+            console.error(
+                "Kuličkové Tvary PRO: chybí HTML prvky."
+            );
+
+
+            return;
+
+        }
+
+
+        createPieces();
+
+
+        createBoard();
+
+
+        startNewPuzzle();
+
+
+        console.log(
+            "Kuličkové Tvary PRO – aplikace spuštěna."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Chyba při spuštění:",
+            error
+        );
+
+
+        setMessage(
+            "Aplikaci se nepodařilo spustit. Obnov stránku.",
+            "bad"
+        );
 
     }
 
 }
 
 
-/* ======================================================
-   START
-====================================================== */
+/*
+    Bezpečné spuštění.
+*/
 
-createPieces();
+if (
+    document.readyState ===
+    "loading"
+) {
 
-createBoard();
+    document.addEventListener(
+        "DOMContentLoaded",
+        boot
+    );
 
-startNewPuzzle();
+} else {
+
+    boot();
+
+}
