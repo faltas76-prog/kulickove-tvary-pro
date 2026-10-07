@@ -1,17 +1,559 @@
-<!doctype html><html lang="cs"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080d16"><meta name="description" content="Kuličkové Tvary PRO">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="stylesheet" href="style.css">
-<title>Kuličkové Tvary PRO</title></head><body><main class="app">
-<header class="hero"><div><div class="brand">KULIČKOVÉ TVARY <span>PRO</span></div><h1>Skládej. Otáčej. Objevuj.</h1><p>Logický hlavolam s barevnými kuličkovými dílky.</p></div>
-<div class="hero-actions"><button id="newGame" class="primary">Nová hra</button><button id="install" class="hidden">⬇ Instalovat</button><button id="sound">🔊 Zvuk</button></div></header>
-<nav class="nav"><button class="navBtn active" data-view="play">🎯 Hra</button><button class="navBtn" data-view="free">✦ Volné skládání</button><button class="navBtn" data-view="editor">🛠 Editor předloh</button><button class="navBtn" data-view="records">🏆 Rekordy</button></nav>
-<section id="playbar" class="bar"><div class="levels"><button class="level active" data-level="easy">Lehká</button><button class="level" data-level="medium">Střední</button><button class="level" data-level="hard">Těžká</button><button id="daily">📅 Denní výzva</button></div><div class="selectors"><label>Úkol <select id="challenge"></select></label><button id="hint">💡 Nápověda</button></div><div class="stats"><div><b id="moves">0</b><small>tahů</small></div><div><b id="timer">00:00</b><small>čas</small></div><div><b id="best">—</b><small>rekord</small></div></div></section>
-<section id="editorbar" class="bar hidden"><div><strong>Editor předlohy</strong><small>Klikáním kresli tvar na ploše.</small></div><div class="selectors"><input id="customName" maxlength="40" placeholder="Název předlohy"><button id="saveTemplate" class="primary">💾 Uložit</button><button id="clearTemplate">Vyčistit</button></div></section>
-<section class="layout">
-<aside class="panel side"><div class="panelTitle"><div><strong id="sideTitle">Předloha</strong><small id="challengeName">Výzva 1</small></div><span id="badge" class="badge">LEHKÁ</span></div><div id="targetPreview" class="target"></div><p id="hintText">Vyplň světle označený tvar všemi dílky.</p><div class="actions"><button id="check" class="primary wide">✓ Zkontrolovat</button><button id="reset" class="wide">↻ Restart</button></div><div id="message" class="message" aria-live="polite">Připraveno.</div></aside>
-<section class="panel boardPanel"><div class="boardHead"><div><strong id="boardTitle">Hrací plocha</strong><small id="placed">0 / 12 dílků</small></div><div class="boardActions"><button id="left">↶</button><button id="right">↷</button><button id="flip">⇄</button><button id="remove">⌫</button></div></div><div id="board" class="board" tabindex="0"></div><div class="keys">PC: <b>R/E</b> otočit · <b>F</b> překlopit · <b>šipky</b> posun · <b>Delete</b> vrátit</div></section>
-<aside class="panel pieces"><div class="panelTitle"><div><strong>Dílky</strong><small>12 kuličkových tvarů</small></div><button id="shuffle">🔀</button></div><div id="tray" class="tray"></div><button id="clear" class="wide">Vyčistit plochu</button></aside></section>
-<section id="records" class="panel records hidden"><div class="panelTitle"><div><strong>🏆 Rekordy</strong><small>Uložené v tomto prohlížeči</small></div><button id="resetRecords">Vynulovat</button></div><div id="recordList"></div></section>
-<section id="success" class="success hidden"><div class="successCard"><div class="trophy">★</div><h2>Skvělá práce!</h2><p id="successText"></p><button id="next" class="primary wide">Další úkol →</button></div></section>
-<footer>Kuličkové Tvary PRO · připraveno pro GitHub Pages</footer></main><script src="app.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+        name="description"
+        content="Kuličkové Tvary PRO – logická hra s barevnými kuličkovými dílky."
+    >
+
+    <meta name="theme-color" content="#080d16">
+
+    <title>Kuličkové Tvary PRO</title>
+
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main class="app">
+
+    <!-- HLAVIČKA -->
+
+    <header class="hero">
+
+        <div class="hero-text">
+
+            <div class="brand">
+                KULIČKOVÉ TVARY
+                <span>PRO</span>
+            </div>
+
+            <h1>
+                Skládej. Otáčej. Objevuj.
+            </h1>
+
+            <p>
+                Digitální logický hlavolam s barevnými kuličkovými dílky.
+            </p>
+
+        </div>
+
+        <div class="hero-actions">
+
+            <button
+                id="newGame"
+                class="button primary"
+                type="button"
+            >
+                Nová hra
+            </button>
+
+            <button
+                id="soundButton"
+                class="button"
+                type="button"
+            >
+                🔊 Zvuk
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- HLAVNÍ MENU -->
+
+    <nav class="main-nav">
+
+        <button
+            class="nav-button active"
+            data-view="game"
+            type="button"
+        >
+            🎯 Hra
+        </button>
+
+        <button
+            class="nav-button"
+            data-view="free"
+            type="button"
+        >
+            ✦ Volné skládání
+        </button>
+
+        <button
+            class="nav-button"
+            data-view="editor"
+            type="button"
+        >
+            🛠 Editor
+        </button>
+
+        <button
+            class="nav-button"
+            data-view="records"
+            type="button"
+        >
+            🏆 Rekordy
+        </button>
+
+    </nav>
+
+
+    <!-- OVLÁDÁNÍ HRY -->
+
+    <section
+        id="gameControls"
+        class="control-bar"
+    >
+
+        <div class="difficulty-buttons">
+
+            <button
+                class="difficulty active"
+                data-level="easy"
+                type="button"
+            >
+                Lehká
+            </button>
+
+            <button
+                class="difficulty"
+                data-level="medium"
+                type="button"
+            >
+                Střední
+            </button>
+
+            <button
+                class="difficulty"
+                data-level="hard"
+                type="button"
+            >
+                Těžká
+            </button>
+
+        </div>
+
+
+        <div class="challenge-select">
+
+            <label for="challengeSelect">
+                Úkol
+            </label>
+
+            <select id="challengeSelect">
+            </select>
+
+        </div>
+
+
+        <div class="stats">
+
+            <div>
+                <strong id="moves">0</strong>
+                <span>Tahů</span>
+            </div>
+
+            <div>
+                <strong id="timer">00:00</strong>
+                <span>Čas</span>
+            </div>
+
+            <div>
+                <strong id="best">—</strong>
+                <span>Rekord</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- EDITOR -->
+
+    <section
+        id="editorControls"
+        class="control-bar hidden"
+    >
+
+        <div>
+
+            <strong>
+                Editor vlastní předlohy
+            </strong>
+
+            <small>
+                Klikáním označ buňky, které mají tvořit výsledný tvar.
+            </small>
+
+        </div>
+
+        <div class="editor-actions">
+
+            <input
+                id="templateName"
+                type="text"
+                maxlength="40"
+                placeholder="Název předlohy"
+            >
+
+            <button
+                id="saveTemplate"
+                class="button primary"
+                type="button"
+            >
+                💾 Uložit
+            </button>
+
+            <button
+                id="clearTemplate"
+                class="button"
+                type="button"
+            >
+                Vyčistit
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- HLAVNÍ HERNÍ PLOCHA -->
+
+    <section class="game-layout">
+
+
+        <!-- LEVÝ PANEL -->
+
+        <aside class="panel information-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <strong id="panelTitle">
+                        Předloha
+                    </strong>
+
+                    <small id="challengeName">
+                        Výzva 1
+                    </small>
+
+                </div>
+
+                <span
+                    id="difficultyBadge"
+                    class="badge"
+                >
+                    LEHKÁ
+                </span>
+
+            </div>
+
+
+            <div
+                id="targetPreview"
+                class="target-preview"
+            >
+            </div>
+
+
+            <p
+                id="hintText"
+                class="hint-text"
+            >
+                Slož světle označený tvar.
+            </p>
+
+
+            <div class="panel-buttons">
+
+                <button
+                    id="checkButton"
+                    class="button primary wide"
+                    type="button"
+                >
+                    ✓ Zkontrolovat řešení
+                </button>
+
+                <button
+                    id="hintButton"
+                    class="button wide"
+                    type="button"
+                >
+                    💡 Nápověda
+                </button>
+
+                <button
+                    id="resetButton"
+                    class="button wide"
+                    type="button"
+                >
+                    ↻ Restart
+                </button>
+
+            </div>
+
+
+            <div
+                id="message"
+                class="message"
+                aria-live="polite"
+            >
+                Vyber dílek a přesuň ho na hrací plochu.
+            </div>
+
+        </aside>
+
+
+        <!-- HRACÍ PLOCHA -->
+
+        <section class="panel board-panel">
+
+            <div class="board-heading">
+
+                <div>
+
+                    <strong>
+                        Hrací plocha
+                    </strong>
+
+                    <small id="placedCount">
+                        0 / 12 dílků
+                    </small>
+
+                </div>
+
+
+                <div class="piece-controls">
+
+                    <button
+                        id="rotateLeft"
+                        class="icon-button"
+                        title="Otočit doleva"
+                        type="button"
+                    >
+                        ↶
+                    </button>
+
+                    <button
+                        id="rotateRight"
+                        class="icon-button"
+                        title="Otočit doprava"
+                        type="button"
+                    >
+                        ↷
+                    </button>
+
+                    <button
+                        id="flipPiece"
+                        class="icon-button"
+                        title="Překlopit"
+                        type="button"
+                    >
+                        ⇄
+                    </button>
+
+                    <button
+                        id="removePiece"
+                        class="icon-button"
+                        title="Vrátit dílek"
+                        type="button"
+                    >
+                        ⌫
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="board"
+                class="board"
+                tabindex="0"
+                aria-label="Hrací plocha"
+            >
+            </div>
+
+
+            <div class="keyboard-help">
+
+                <span>
+                    PC:
+                </span>
+
+                <b>R</b>
+                otočit
+
+                <b>E</b>
+                opačně
+
+                <b>F</b>
+                překlopit
+
+                <b>← ↑ ↓ →</b>
+                posun
+
+                <b>Delete</b>
+                vrátit
+
+            </div>
+
+        </section>
+
+
+        <!-- DÍLKY -->
+
+        <aside class="panel pieces-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <strong>
+                        Dílky
+                    </strong>
+
+                    <small>
+                        12 barevných tvarů
+                    </small>
+
+                </div>
+
+                <button
+                    id="shuffleColors"
+                    class="small-button"
+                    type="button"
+                >
+                    🔀
+                </button>
+
+            </div>
+
+
+            <div
+                id="piecesTray"
+                class="pieces-tray"
+            >
+            </div>
+
+
+            <button
+                id="clearBoard"
+                class="button wide"
+                type="button"
+            >
+                Vyčistit plochu
+            </button>
+
+        </aside>
+
+    </section>
+
+
+    <!-- REKORDY -->
+
+    <section
+        id="recordsPanel"
+        class="panel records-panel hidden"
+    >
+
+        <div class="panel-heading">
+
+            <div>
+
+                <strong>
+                    🏆 Rekordy
+                </strong>
+
+                <small>
+                    Nejlepší výsledky uložené v tomto zařízení
+                </small>
+
+            </div>
+
+            <button
+                id="clearRecords"
+                class="button"
+                type="button"
+            >
+                Vynulovat
+            </button>
+
+        </div>
+
+        <div id="recordsList">
+        </div>
+
+    </section>
+
+
+    <!-- ÚSPĚŠNÉ DOKONČENÍ -->
+
+    <div
+        id="successModal"
+        class="modal hidden"
+    >
+
+        <div class="success-card">
+
+            <div class="success-icon">
+                ★
+            </div>
+
+            <h2>
+                Skvělá práce!
+            </h2>
+
+            <p id="successText">
+                Předloha je správně složená.
+            </p>
+
+            <div class="success-buttons">
+
+                <button
+                    id="closeSuccess"
+                    class="button"
+                    type="button"
+                >
+                    Zůstat
+                </button>
+
+                <button
+                    id="nextChallenge"
+                    class="button primary"
+                    type="button"
+                >
+                    Další úkol →
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+        Kuličkové Tvary PRO · připraveno pro GitHub Pages
+    </footer>
+
+</main>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>
