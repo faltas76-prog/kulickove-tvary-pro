@@ -597,7 +597,7 @@ button.primary,
 
     grid-template-columns:
         repeat(
-            12,
+            var(--board-columns, 12),
             minmax(
                 0,
                 1fr
@@ -606,13 +606,12 @@ button.primary,
 
     grid-template-rows:
         repeat(
-            10,
+            var(--board-rows, 10),
             minmax(
                 0,
                 1fr
             )
         );
-
     width: 100%;
 
     aspect-ratio:
