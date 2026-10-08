@@ -866,6 +866,55 @@ function chooseDifficulty() {
 
 }
 
+/* =========================================================
+   VELIKOST HRACÍ PLOCHY PODLE OBTÍŽNOSTI
+========================================================= */
+
+function setBoardSize() {
+
+    const rule =
+        DIFFICULTY[difficulty];
+
+    W = rule.width;
+    H = rule.height;
+
+
+    /*
+        Předáme velikost také CSS.
+        Díky tomu nemusíme mít
+        pevně nastavených 12 sloupců.
+    */
+
+    if (board) {
+
+        board.style.setProperty(
+            "--board-columns",
+            W
+        );
+
+        board.style.setProperty(
+            "--board-rows",
+            H
+        );
+
+    }
+
+
+    if (preview) {
+
+        preview.style.setProperty(
+            "--board-columns",
+            W
+        );
+
+        preview.style.setProperty(
+            "--board-rows",
+            H
+        );
+
+    }
+
+}
 
 /* =========================================================
    PŘEDEM UMÍSTĚNÉ DÍLKY
@@ -875,8 +924,7 @@ function preplacePieces() {
 
     const rule =
         DIFFICULTY[
-            difficulty
-        ];
+            difficulty        ];
 
 
     preplaced =
