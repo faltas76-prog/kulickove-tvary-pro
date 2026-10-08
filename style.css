@@ -733,13 +733,13 @@ button.primary,
 
     grid-template-columns:
         repeat(
-            12,
+            var(--board-columns, 12),
             1fr
         );
 
     grid-template-rows:
         repeat(
-            10,
+            var(--board-rows, 10),
             1fr
         );
 
