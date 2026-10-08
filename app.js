@@ -2178,10 +2178,18 @@ function startNewPuzzle() {
 
 
     difficulty =
-        chooseDifficulty();
+    chooseDifficulty();
 
 
-    preplacePieces();
+/*
+    Nastavení velikosti plochy
+    podle obtížnosti.
+*/
+
+setBoardSize();
+
+
+preplacePieces();
 
 
     if (badge) {
