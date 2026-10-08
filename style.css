@@ -1,61 +1,2326 @@
-/* ======================================================
-   PŘEDEM UMÍSTĚNÉ DÍLKY
-====================================================== */
+/* =========================================================
+   KULIČKOVÉ TVARY PRO
+   KOMPLETNÍ VZHLED APLIKACE
+   PC / TABLET / MOBIL
+========================================================= */
 
-.board-piece.fixed-piece {
-    cursor: default;
+
+/* =========================================================
+   ZÁKLAD
+========================================================= */
+
+* {
+    box-sizing: border-box;
 }
 
-.board-piece.fixed-piece .bead {
+
+html {
+    margin: 0;
+    padding: 0;
+    background: #08101d;
+}
+
+
+body {
+    margin: 0;
+    padding: 0;
+
+    min-height: 100vh;
+
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: #f5f7fb;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #203554 0,
+            #0d1727 42%,
+            #070c15 100%
+        );
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HLAVNÍ KONTEJNER
+========================================================= */
+
+main {
+    width: min(
+        1500px,
+        calc(100% - 32px)
+    );
+
+    margin: 0 auto;
+
+    padding:
+        24px
+        0
+        50px;
+}
+
+
+/* =========================================================
+   HEADER / HERO
+========================================================= */
+
+.hero {
+    position: relative;
+
+    margin-bottom: 20px;
+
+    padding:
+        28px
+        30px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #172943,
+            #0c1626
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .10
+        );
+
     box-shadow:
-        inset -5px -7px 8px rgba(0, 0, 0, .28),
-        inset 3px 3px 5px rgba(255, 255, 255, .65),
-        0 0 0 2px rgba(255, 255, 255, .15),
-        0 4px 5px rgba(0, 0, 0, .35);
+        0 20px 60px
+        rgba(
+            0,
+            0,
+            0,
+            .35
+        );
+
+    overflow: hidden;
 }
 
 
-/* Označení předem vloženého dílku */
-
-.board-piece.fixed-piece::after {
-    content: "✓";
+.hero::before {
+    content: "";
 
     position: absolute;
 
-    right: 2px;
-    top: 2px;
+    width: 320px;
+    height: 320px;
 
-    width: 18px;
-    height: 18px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
+    right: -130px;
+    top: -170px;
 
     border-radius: 50%;
 
-    background: #43d17b;
+    background:
+        rgba(
+            0,
+            220,
+            160,
+            .12
+        );
 
-    color: #06130b;
-
-    font-size: 11px;
-
-    font-weight: 900;
-
-    z-index: 20;
+    filter:
+        blur(10px);
 }
 
 
-/* Na mobilu trochu výraznější označení */
+.brand {
+    position: relative;
 
-@media (max-width: 720px) {
+    display: inline-block;
 
-    .board-piece.fixed-piece::after {
-        width: 20px;
-        height: 20px;
+    margin-bottom: 10px;
 
-        font-size: 12px;
+    color: #ffd72e;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    letter-spacing:
+        2px;
+
+    text-transform:
+        uppercase;
+}
+
+
+.brand span {
+    color: #ffffff;
+}
+
+
+.hero h1 {
+    position: relative;
+
+    margin:
+        0 0 10px;
+
+    font-size:
+        clamp(
+            34px,
+            5vw,
+            68px
+        );
+
+    line-height: 1.05;
+
+    font-weight: 900;
+
+    letter-spacing:
+        -2px;
+}
+
+
+.hero p,
+.hero small {
+    position: relative;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            .70
+        );
+
+    font-size:
+        16px;
+}
+
+
+/* =========================================================
+   HORNÍ TLAČÍTKA
+========================================================= */
+
+.hero-actions {
+    position: relative;
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 22px;
+}
+
+
+button {
+    appearance: none;
+
+    border: 0;
+
+    min-height: 44px;
+
+    padding:
+        10px
+        17px;
+
+    border-radius: 12px;
+
+    background:
+        #26364e;
+
+    color: #ffffff;
+
+    font-family:
+        inherit;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        box-shadow .15s ease;
+
+    box-shadow:
+        0 5px 15px
+        rgba(
+            0,
+            0,
+            0,
+            .18
+        );
+
+    touch-action: manipulation;
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+
+button:hover {
+    background:
+        #344b6c;
+
+    transform:
+        translateY(-2px);
+}
+
+
+button:active {
+    transform:
+        translateY(1px)
+        scale(.98);
+}
+
+
+button.primary,
+#newGame {
+    background:
+        linear-gradient(
+            135deg,
+            #ffcc18,
+            #ff9e00
+        );
+
+    color:
+        #171717;
+
+    box-shadow:
+        0 7px 22px
+        rgba(
+            255,
+            170,
+            0,
+            .25
+        );
+}
+
+
+/* =========================================================
+   NAVIGACE
+========================================================= */
+
+.nav {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin:
+        0 0 15px;
+}
+
+
+.nav button {
+    min-height: 40px;
+
+    padding:
+        8px 15px;
+
+    background:
+        #17263c;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+}
+
+
+.nav button.active {
+    background:
+        linear-gradient(
+            135deg,
+            #00cfa3,
+            #00a9c7
+        );
+
+    color:
+        #06151a;
+}
+
+
+/* =========================================================
+   ÚROVNĚ
+========================================================= */
+
+.levels {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-bottom: 15px;
+}
+
+
+.levels button {
+    min-height: 38px;
+
+    background:
+        #19283d;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .10
+        );
+}
+
+
+.levels button.active {
+    background:
+        #ffd21f;
+
+    color:
+        #151515;
+}
+
+
+/* =========================================================
+   HIDDEN
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   BAR
+========================================================= */
+
+.bar {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+
+    padding:
+        13px 16px;
+
+    border-radius: 15px;
+
+    background:
+        rgba(
+            20,
+            34,
+            54,
+            .92
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+
+    box-shadow:
+        0 8px 25px
+        rgba(
+            0,
+            0,
+            0,
+            .20
+        );
+}
+
+
+/* =========================================================
+   HLAVNÍ LAYOUT
+========================================================= */
+
+.layout {
+    display: grid;
+
+    grid-template-columns:
+        280px
+        minmax(
+            450px,
+            1fr
+        )
+        280px;
+
+    gap: 18px;
+
+    align-items: start;
+}
+
+
+/* =========================================================
+   PANELY
+========================================================= */
+
+.panel {
+    position: relative;
+
+    padding: 18px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(
+                27,
+                43,
+                66,
+                .98
+            ),
+            rgba(
+                13,
+                24,
+                40,
+                .98
+            )
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+
+    box-shadow:
+        0 14px 40px
+        rgba(
+            0,
+            0,
+            0,
+            .28
+        );
+}
+
+
+.panelTitle {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    margin-bottom: 15px;
+
+    color: #ffffff;
+}
+
+
+.panelTitle strong {
+    font-size: 20px;
+}
+
+
+.panelTitle small {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            .55
+        );
+}
+
+
+/* =========================================================
+   BOARDED / HRACÍ PLOCHA
+========================================================= */
+
+.panel.boardPanel {
+    min-width: 0;
+}
+
+
+.boardHead {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+}
+
+
+.boardHead strong {
+    font-size: 21px;
+}
+
+
+.boardHead small {
+    color:
+        #8fabc9;
+}
+
+
+/* =========================================================
+   HRACÍ PLOCHA
+========================================================= */
+
+#board {
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            12,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    grid-template-rows:
+        repeat(
+            10,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    width: 100%;
+
+    aspect-ratio:
+        12 / 10;
+
+    padding: 9px;
+
+    gap: 3px;
+
+    border-radius: 22px;
+
+    background:
+
+        radial-gradient(
+            circle at 35% 25%,
+            rgba(
+                255,
+                255,
+                255,
+                .07
+            ),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            145deg,
+            #16865d,
+            #075b42
+        );
+
+    border:
+        5px solid
+        #263a47;
+
+    box-shadow:
+
+        inset 0 0 0 2px
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        ),
+
+        inset 0 -18px 35px
+        rgba(
+            0,
+            0,
+            0,
+            .25
+        ),
+
+        0 18px 45px
+        rgba(
+            0,
+            0,
+            0,
+            .35
+        );
+
+    /*
+        KRITICKÉ PRO MOBIL:
+        zabrání prohlížeči,
+        aby při tažení dílku
+        posouval stránku.
+    */
+
+    touch-action:
+        none;
+
+    user-select:
+        none;
+
+    -webkit-user-select:
+        none;
+
+    overflow:
+        hidden;
+}
+
+
+/* =========================================================
+   POLÍČKA
+========================================================= */
+
+.cell {
+    position: relative;
+
+    border-radius: 5px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .08
+        );
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(
+            255,
+            255,
+            255,
+            .045
+        );
+
+    pointer-events:
+        auto;
+}
+
+
+/* =========================================================
+   PŘEDLOHA
+========================================================= */
+
+#targetPreview {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            12,
+            1fr
+        );
+
+    grid-template-rows:
+        repeat(
+            10,
+            1fr
+        );
+
+    width: 100%;
+
+    aspect-ratio:
+        12 / 10;
+
+    padding: 8px;
+
+    gap: 3px;
+
+    border-radius: 16px;
+
+    background:
+        #0a1523;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+}
+
+
+.target-cell {
+    border-radius: 4px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .025
+        );
+}
+
+
+.target-cell.target {
+    background:
+        linear-gradient(
+            145deg,
+            #ffe36a,
+            #ffb900
+        );
+
+    box-shadow:
+        0 0 8px
+        rgba(
+            255,
+            208,
+            40,
+            .35
+        );
+}
+
+
+/* =========================================================
+   DÍLEK NA HRACÍ PLOŠE
+========================================================= */
+
+.board-piece {
+    position: relative;
+
+    display: block;
+
+    z-index: 20;
+
+    min-width: 0;
+    min-height: 0;
+
+    cursor:
+        grab;
+
+    touch-action:
+        none;
+
+    user-select:
+        none;
+
+    -webkit-user-select:
+        none;
+
+    -webkit-touch-callout:
+        none;
+}
+
+
+.board-piece:active {
+    cursor:
+        grabbing;
+}
+
+
+.board-piece.selected {
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(
+                255,
+                238,
+                70,
+                .95
+            )
+        );
+}
+
+
+/* =========================================================
+   3D KULIČKY
+========================================================= */
+
+.bead {
+    position: absolute;
+
+    display: block;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 30% 25%,
+            #ffffff 0%,
+            rgba(
+                255,
+                255,
+                255,
+                .75
+            ) 8%,
+            var(--piece) 28%,
+            var(--piece) 65%,
+            #000000 100%
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .30
+        );
+
+    box-shadow:
+
+        inset -7px -8px 10px
+        rgba(
+            0,
+            0,
+            0,
+            .30
+        ),
+
+        inset 4px 4px 6px
+        rgba(
+            255,
+            255,
+            255,
+            .55
+        ),
+
+        0 5px 8px
+        rgba(
+            0,
+            0,
+            0,
+            .38
+        );
+
+    transform:
+        scale(
+            .88
+        );
+
+    transition:
+        transform .12s ease;
+}
+
+
+.board-piece:hover .bead {
+    transform:
+        scale(
+            .94
+        );
+}
+
+
+/* =========================================================
+   PŘEDEM UMÍSTĚNÉ DÍLKY
+========================================================= */
+
+.board-piece.fixed-piece {
+    cursor:
+        default;
+}
+
+
+.board-piece.fixed-piece .bead {
+    box-shadow:
+
+        inset -7px -8px 10px
+        rgba(
+            0,
+            0,
+            0,
+            .30
+        ),
+
+        inset 4px 4px 6px
+        rgba(
+            255,
+            255,
+            255,
+            .65
+        ),
+
+        0 0 0 2px
+        rgba(
+            255,
+            255,
+            255,
+            .18
+        ),
+
+        0 5px 8px
+        rgba(
+            0,
+            0,
+            0,
+            .35
+        );
+}
+
+
+.board-piece.fixed-piece::after {
+    content:
+        "✓";
+
+    position:
+        absolute;
+
+    right:
+        2px;
+
+    top:
+        2px;
+
+    width:
+        20px;
+
+    height:
+        20px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #42d77c;
+
+    color:
+        #082013;
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    z-index:
+        30;
+
+    box-shadow:
+        0 2px 5px
+        rgba(
+            0,
+            0,
+            0,
+            .35
+        );
+}
+
+
+/* =========================================================
+   ZÁSOBNÍK DÍLKŮ
+========================================================= */
+
+#piecesTray {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        10px;
+}
+
+
+.piece-card {
+    position:
+        relative;
+
+    min-height:
+        85px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        8px;
+
+    border-radius:
+        15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #243952,
+            #152338
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .09
+        );
+
+    cursor:
+        grab;
+
+    touch-action:
+        none;
+
+    user-select:
+        none;
+
+    -webkit-user-select:
+        none;
+
+    transition:
+        transform .15s ease,
+        border-color .15s ease,
+        background .15s ease;
+}
+
+
+.piece-card:hover {
+    transform:
+        translateY(
+            -3px
+        );
+
+    border-color:
+        rgba(
+            255,
+            215,
+            40,
+            .55
+        );
+}
+
+
+.piece-card.selected {
+    border:
+        2px solid
+        #ffd21f;
+
+    background:
+        linear-gradient(
+            145deg,
+            #354c69,
+            #1d2d45
+        );
+
+    box-shadow:
+        0 0 15px
+        rgba(
+            255,
+            210,
+            31,
+            .20
+        );
+}
+
+
+.piece-card.placed {
+    opacity:
+        .45;
+
+    cursor:
+        default;
+}
+
+
+/* =========================================================
+   MINI DÍLKY
+========================================================= */
+
+.mini-shape {
+    position:
+        relative;
+
+    flex:
+        0 0 auto;
+}
+
+
+.mini-bead {
+    position:
+        absolute;
+
+    display:
+        block;
+
+    border-radius:
+        50%;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .35
+        );
+
+    box-shadow:
+
+        inset -4px -5px 6px
+        rgba(
+            0,
+            0,
+            0,
+            .30
+        ),
+
+        inset 2px 2px 4px
+        rgba(
+            255,
+            255,
+            255,
+            .55
+        ),
+
+        0 3px 5px
+        rgba(
+            0,
+            0,
+            0,
+            .35
+        );
+
+    border-radius:
+        50%;
+}
+
+
+.piece-number {
+    position:
+        absolute;
+
+    right:
+        7px;
+
+    bottom:
+        5px;
+
+    min-width:
+        20px;
+
+    height:
+        20px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .35
+        );
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            .75
+        );
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+
+/* =========================================================
+   EDITOR
+========================================================= */
+
+.editor {
+    display:
+        grid;
+
+    gap:
+        12px;
+}
+
+
+.editor input {
+    width:
+        100%;
+
+    min-height:
+        44px;
+
+    padding:
+        10px 12px;
+
+    border-radius:
+        10px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .15
+        );
+
+    background:
+        #0d1828;
+
+    color:
+        white;
+
+    font:
+        inherit;
+}
+
+
+.editor input::placeholder {
+    color:
+        #71839a;
+}
+
+
+/* =========================================================
+   STATISTIKY
+========================================================= */
+
+.stats {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            1fr
+        );
+
+    gap:
+        8px;
+
+    margin-bottom:
+        12px;
+}
+
+
+.stat {
+    padding:
+        12px;
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .18
+        );
+
+    text-align:
+        center;
+}
+
+
+.stat strong {
+    display:
+        block;
+
+    color:
+        #ffd21f;
+
+    font-size:
+        20px;
+}
+
+
+.stat small {
+    color:
+        #8da1b8;
+}
+
+
+/* =========================================================
+   OBTÍŽNOST
+========================================================= */
+
+#difficultyBadge {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        30px;
+
+    padding:
+        5px 11px;
+
+    border-radius:
+        20px;
+
+    background:
+        #ffd21f;
+
+    color:
+        #181818;
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .5px;
+}
+
+
+#challengeName {
+    color:
+        #9cb1c8;
+
+    font-size:
+        13px;
+}
+
+
+/* =========================================================
+   HLÁŠENÍ
+========================================================= */
+
+#message {
+    margin:
+        12px 0;
+
+    padding:
+        12px 14px;
+
+    min-height:
+        44px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .05
+        );
+
+    color:
+        #dce6f1;
+
+    font-size:
+        14px;
+
+    line-height:
+        1.4;
+}
+
+
+#message.good {
+    background:
+        rgba(
+            40,
+            210,
+            125,
+            .14
+        );
+
+    color:
+        #68e8a0;
+
+    border:
+        1px solid
+        rgba(
+            60,
+            230,
+            140,
+            .25
+        );
+}
+
+
+#message.bad {
+    background:
+        rgba(
+            255,
+            70,
+            80,
+            .12
+        );
+
+    color:
+        #ff9a9f;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            70,
+            80,
+            .22
+        );
+}
+
+
+/* =========================================================
+   OVLÁDACÍ PRVKY DÍLKU
+========================================================= */
+
+.piece-controls {
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+
+    margin:
+        10px 0;
+}
+
+
+.piece-controls button {
+    flex:
+        1 1 auto;
+
+    min-width:
+        45px;
+
+    min-height:
+        42px;
+
+    padding:
+        8px 10px;
+}
+
+
+/* =========================================================
+   SUCCESS MODAL
+========================================================= */
+
+#successModal {
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        1000;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        20px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .72
+        );
+
+    backdrop-filter:
+        blur(
+            8px
+        );
+}
+
+
+#successModal.hidden {
+    display:
+        none !important;
+}
+
+
+.successCard {
+    width:
+        min(
+            450px,
+            100%
+        );
+
+    padding:
+        30px;
+
+    border-radius:
+        25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #1e334f,
+            #0d1929
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .12
+        );
+
+    text-align:
+        center;
+
+    box-shadow:
+        0 30px 80px
+        rgba(
+            0,
+            0,
+            0,
+            .50
+        );
+}
+
+
+.successCard h2 {
+    margin:
+        0 0 10px;
+
+    font-size:
+        30px;
+
+    color:
+        #ffd21f;
+}
+
+
+.successCard p {
+    color:
+        #aabbd0;
+
+    margin-bottom:
+        22px;
+}
+
+
+/* =========================================================
+   RECORDS
+========================================================= */
+
+.records {
+    display:
+        grid;
+
+    gap:
+        8px;
+}
+
+
+.record {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        10px 12px;
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .04
+        );
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    margin-top:
+        25px;
+
+    padding:
+        20px;
+
+    text-align:
+        center;
+
+    color:
+        #71839a;
+
+    font-size:
+        13px;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (
+    max-width: 1100px
+) {
+
+    main {
+        width:
+            min(
+                100% - 22px,
+                950px
+            );
     }
 
+
+    .layout {
+        grid-template-columns:
+            220px
+            minmax(
+                400px,
+                1fr
+            )
+            220px;
+
+        gap:
+            12px;
+    }
+
+
+    .panel {
+        padding:
+            14px;
+    }
+
+
+    #piecesTray {
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+}
+
+
+/* =========================================================
+   MOBIL
+========================================================= */
+
+@media (
+    max-width: 800px
+) {
+
+    main {
+        width:
+            calc(
+                100% - 16px
+            );
+
+        padding-top:
+            8px;
+    }
+
+
+    .hero {
+        padding:
+            20px 17px;
+
+        border-radius:
+            18px;
+    }
+
+
+    .hero h1 {
+        font-size:
+            clamp(
+                30px,
+                9vw,
+                46px
+            );
+
+        letter-spacing:
+            -1px;
+    }
+
+
+    .hero-actions {
+        display:
+            grid;
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+
+    .hero-actions button {
+        width:
+            100%;
+    }
+
+
+    .nav {
+        display:
+            grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+
+    .nav button {
+        width:
+            100%;
+    }
+
+
+    .levels {
+        display:
+            grid;
+
+        grid-template-columns:
+            repeat(
+                3,
+                1fr
+            );
+    }
+
+
+    .levels button {
+        width:
+            100%;
+
+        padding:
+            8px 5px;
+    }
+
+
+    /*
+        Hlavní změna pro telefon:
+        panely se řadí pod sebe.
+    */
+
+    .layout {
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        gap:
+            12px;
+    }
+
+
+    .layout > * {
+        width:
+            100%;
+    }
+
+
+    /*
+        Hrací plocha je první
+        a zabírá téměř celou
+        šířku telefonu.
+    */
+
+    .panel.boardPanel {
+        order:
+            1;
+    }
+
+
+    .panel.panel_side {
+        order:
+            2;
+    }
+
+
+    .panel.panel_pieces {
+        order:
+            3;
+    }
+
+
+    #board {
+        width:
+            100%;
+
+        padding:
+            6px;
+
+        gap:
+            2px;
+
+        border-width:
+            4px;
+
+        border-radius:
+            17px;
+    }
+
+
+    #targetPreview {
+        max-width:
+            500px;
+
+        margin:
+            0 auto;
+    }
+
+
+    #piecesTray {
+        grid-template-columns:
+            repeat(
+                3,
+                1fr
+            );
+
+        gap:
+            7px;
+    }
+
+
+    .piece-card {
+        min-height:
+            78px;
+
+        padding:
+            5px;
+    }
+
+
+    .piece-number {
+        right:
+            4px;
+
+        bottom:
+            3px;
+    }
+
+
+    .bead {
+        box-shadow:
+
+            inset -4px -5px 7px
+            rgba(
+                0,
+                0,
+                0,
+                .30
+            ),
+
+            inset 2px 2px 4px
+            rgba(
+                255,
+                255,
+                255,
+                .55
+            ),
+
+            0 3px 5px
+            rgba(
+                0,
+                0,
+                0,
+                .35
+            );
+
+        transform:
+            scale(
+                .86
+            );
+    }
+
+
+    .stats {
+        grid-template-columns:
+            repeat(
+                3,
+                1fr
+            );
+    }
+
+
+    button {
+        min-height:
+            44px;
+    }
+
+}
+
+
+/* =========================================================
+   MALÝ TELEFON
+========================================================= */
+
+@media (
+    max-width: 480px
+) {
+
+    main {
+        width:
+            calc(
+                100% - 10px
+            );
+    }
+
+
+    .hero {
+        padding:
+            16px 13px;
+
+        border-radius:
+            15px;
+    }
+
+
+    .brand {
+        font-size:
+            12px;
+    }
+
+
+    .hero h1 {
+        font-size:
+            29px;
+    }
+
+
+    .hero p {
+        font-size:
+            14px;
+    }
+
+
+    .hero-actions {
+        gap:
+            6px;
+    }
+
+
+    .hero-actions button {
+        padding:
+            8px 7px;
+
+        font-size:
+            13px;
+    }
+
+
+    .nav {
+        gap:
+            5px;
+    }
+
+
+    .nav button {
+        padding:
+            8px 5px;
+
+        font-size:
+            13px;
+    }
+
+
+    .levels {
+        gap:
+            5px;
+    }
+
+
+    .levels button {
+        font-size:
+            12px;
+    }
+
+
+    .panel {
+        padding:
+            10px;
+
+        border-radius:
+            15px;
+    }
+
+
+    .panelTitle strong {
+        font-size:
+            17px;
+    }
+
+
+    /*
+        Dílky jsou na telefonu
+        větší a lépe ovladatelné.
+    */
+
+    #piecesTray {
+        grid-template-columns:
+            repeat(
+                3,
+                1fr
+            );
+
+        gap:
+            6px;
+    }
+
+
+    .piece-card {
+        min-height:
+            82px;
+    }
+
+
+    .mini-bead {
+        width:
+            20px !important;
+
+        height:
+            20px !important;
+    }
+
+
+    .mini-shape {
+        transform:
+            scale(
+                .92
+            );
+
+        transform-origin:
+            center;
+    }
+
+
+    .piece-controls {
+        gap:
+            5px;
+    }
+
+
+    .piece-controls button {
+        min-height:
+            44px;
+
+        padding:
+            6px;
+    }
+
+
+    #message {
+        font-size:
+            13px;
+    }
+
+}
+
+
+/* =========================================================
+   EXTRA MALÝ TELEFON
+========================================================= */
+
+@media (
+    max-width: 360px
+) {
+
+    .hero h1 {
+        font-size:
+            26px;
+    }
+
+
+    #piecesTray {
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+
+    .boardHead {
+        align-items:
+            flex-start;
+    }
+
+
+    .stats strong {
+        font-size:
+            17px;
+    }
+
+}
+
+
+/* =========================================================
+   ZÁKAZ VÝBĚRU PŘI HRANÍ
+========================================================= */
+
+#board,
+#board *,
+#piecesTray,
+#piecesTray * {
+    -webkit-user-select:
+        none;
+
+    user-select:
+        none;
+}
+
+
+/* =========================================================
+   OCHRANA PRO IOS / SAFARI
+========================================================= */
+
+button,
+.board-piece,
+.piece-card {
+    -webkit-touch-callout:
+        none;
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+
+/* =========================================================
+   PLYNULÉ POSOUVÁNÍ
+========================================================= */
+
+html {
+    scroll-behavior:
+        smooth;
+}
+
+
+/* =========================================================
+   PŘEDVYPLNĚNÉ DÍLKY – ✓
+========================================================= */
+
+.board-piece.fixed-piece::after {
+    content:
+        "✓";
+
+    position:
+        absolute;
+
+    right:
+        2px;
+
+    top:
+        2px;
+
+    width:
+        20px;
+
+    height:
+        20px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #43d17b;
+
+    color:
+        #06130b;
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    z-index:
+        50;
 }
